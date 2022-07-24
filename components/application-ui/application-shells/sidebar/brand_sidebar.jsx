@@ -230,10 +230,9 @@ export default function Sidebar(props) {
                     <nav className="flex flex-col h-full">
                       <div className="space-y-1">
                         {sidebarNavigation.map((item) => (
-                          <Link href={item.href}>
+                          <Link href={item.href} key={item.name}>
                             <a
                               onClick={() => menuMobile(item.href)}
-                              key={item.name}
                               className={classNames(
                                 item.current
                                   ? "bg-green-100 text-green-500 font-bold"

@@ -30,11 +30,6 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/marketing": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/marketing.js"
-    ],
     "/plantios": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
