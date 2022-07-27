@@ -10,7 +10,15 @@ html {
   transition: background-color 0.1s ease, color 0.1s ease,
     border-color 0.1s ease;
 }
-
+.gmnoprint {
+  display: none;
+}
+.gm-style-cc {
+  display: none;
+}
+button.gm-control-active.gm-fullscreen-control {
+  display: none;
+}
 .intro-slide1 {
   min-height: 100%;
   background-size: cover;

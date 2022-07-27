@@ -10,6 +10,24 @@ import {
   PrimaryLogo,
 } from "../components/vectors/custom";
 import { useEffect } from "react";
+import GoogleMapReact from "google-map-react";
+
+const AnyReactComponent = () => (
+  <div>
+    <img
+      style={{ transform: "translateY(-50%)" }}
+      src="/images/circledIcon.png"
+    ></img>
+  </div>
+);
+
+const defaultProps = {
+  center: {
+    lat: -23.014434852616468,
+    lng: -43.44663240674625,
+  },
+  zoom: 0,
+};
 
 const stats = [
   {
@@ -33,6 +51,10 @@ const stats = [
     suffix: "g",
   },
 ];
+
+const handleApiLoaded = (map, maps) => {
+  map.setMapTypeId("satellite");
+};
 
 export default function Home() {
   return (
@@ -96,9 +118,21 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="lg:-ml-[6.666667%] -mt-[6.666667%] bg-green-200 lg:w-4/6">
-          <h2>2asdasdasdasdasdas</h2>
-          <h2>2asdasdasdasdasdas</h2>
+        <div className="lg:-ml-[6.666667%] -mt-[6.666667%]  lg:mt-0 bg-green-200 lg:w-4/6">
+          <div style={{ height: "100vh", width: "100%" }}>
+            <GoogleMapReact
+              bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_MAPS_KEY }}
+              defaultCenter={defaultProps.center}
+              defaultZoom={defaultProps.zoom}
+              yesIWantToUseGoogleMapApiInternals
+              onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
+            >
+              <AnyReactComponent
+                lat={-23.014434852616468}
+                lng={-43.44663240674625}
+              />
+            </GoogleMapReact>
+          </div>
         </div>
       </div>
     </div>
