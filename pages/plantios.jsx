@@ -35,8 +35,6 @@ const stats = [
 ];
 
 export default function Home() {
-
-
   return (
     <div>
       <Head>
@@ -44,7 +42,7 @@ export default function Home() {
       </Head>
 
       <div className="flex flex-col lg:flex-row lg:h-screen">
-        <div className="z-10 overflow-scroll bg-green-500 lg:w-2/5 rounded-b-xl lg:rounded-r-xl">
+        <div className="z-10 overflow-scroll bg-green-500 lg:w-2/5 rounded-b-xl lg:rounded-bl-none lg:rounded-tr-xl 2xl:pb-20">
           <div className="m-6 sm:mx-10 sm:mt-10">
             <h1 className="text-4xl font-medium text-white">Meus Plantios</h1>
             <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
@@ -61,6 +59,7 @@ export default function Home() {
                       <item.icon
                         className="w-8 h-8 text-gray-800 fill-gray-800"
                         aria-hidden="true"
+                        filled
                       />
                     </div>
                     <p className="ml-16 text-xs font-medium text-green-500 truncate">

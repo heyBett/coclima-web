@@ -10,7 +10,13 @@ import {
   XIcon,
   LogoutIcon,
 } from "@heroicons/react/solid";
-import { PrimaryLogo } from "../../../vectors/custom";
+import {
+  PrimaryLogo,
+  AdminIcon,
+  MarketingIcon,
+  TreeIcon,
+  DashboardIcon,
+} from "../../../vectors/custom";
 import { SearchIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,19 +34,19 @@ export default function Sidebar(props) {
     {
       name: "Dashboard",
       href: "/",
-      icon: HomeIcon,
+      icon: DashboardIcon,
     },
-    { name: "Plantio", href: "/plantios", icon: ViewGridIcon },
+    { name: "Plantio", href: "/plantios", icon: TreeIcon },
     {
       name: "Marketing",
       href: "/marketing",
-      icon: BriefcaseIcon,
+      icon: MarketingIcon,
     },
-    { name: "Configurações", href: "/settings", icon: CogIcon },
+
     {
       name: "Administrativo",
       href: "/admin",
-      icon: CogIcon,
+      icon: AdminIcon,
       admin: true,
     },
   ]);
@@ -103,15 +109,19 @@ export default function Sidebar(props) {
                     )}
                     aria-current={item.current ? "page" : undefined}
                   >
-                    <item.icon
-                      className={classNames(
-                        item.current
-                          ? "text-green-500"
-                          : "text-green-500 group-hover:text-white",
-                        "h-6 w-6"
-                      )}
-                      aria-hidden="true"
-                    />
+                    {item.current ? (
+                      <item.icon
+                        className="w-5 h-5 fill-green-500"
+                        aria-hidden="true"
+                        filled
+                      />
+                    ) : (
+                      <item.icon
+                        className="w-5 h-5 fill-green-500 group-hover:fill-white"
+                        aria-hidden="true"
+                      />
+                    )}
+
                     <span className="ml-3">{item.name}</span>
                   </a>
                 </Link>
@@ -241,16 +251,19 @@ export default function Sidebar(props) {
                               )}
                               aria-current={item.current ? "page" : undefined}
                             >
-                              <item.icon
-                                className={classNames(
-                                  item.current
-                                    ? "text-green-500"
-                                    : "text-green-500 group-hover:text-white",
-                                  "h-6 w-6"
-                                )}
-                                aria-hidden="true"
-                              />
-                              <span>{item.name}</span>
+                              {item.current ? (
+                                <item.icon
+                                  className="w-5 h-5 fill-green-500"
+                                  aria-hidden="true"
+                                  filled
+                                />
+                              ) : (
+                                <item.icon
+                                  className="w-5 h-5 fill-green-500 group-hover:fill-white"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span className="ml-3">{item.name}</span>
                             </a>
                           </Link>
                         ))}

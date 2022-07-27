@@ -1,5 +1,6 @@
 import '../styles/globals.css'
 import { Layout } from '../components/layout';
+import { SessionProvider } from 'next-auth/react';
 
 function App({ Component, pageProps }) {
 
@@ -7,14 +8,14 @@ function App({ Component, pageProps }) {
 
 
   return (
+    <SessionProvider session={pageProps.session}>
+      <Layout>
+        <Component {...pageProps}>
 
-    <Layout>
-      <Component {...pageProps}>
 
-
-      </Component>
-    </Layout>
-
+        </Component>
+      </Layout>
+    </SessionProvider>
   )
 }
 

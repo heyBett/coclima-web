@@ -67,6 +67,7 @@ export default function Example() {
             <dt>
               <div className="absolute p-2 rounded-md">
                 <item.icon
+                  filled
                   className="w-8 h-8 text-gray-800 fill-gray-800"
                   aria-hidden="true"
                 />
