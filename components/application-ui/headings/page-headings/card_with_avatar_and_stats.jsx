@@ -43,9 +43,9 @@ export default function Hello() {
                 Olá novamente,
               </p>
               <p className="text-xl font-bold text-gray-900 sm:text-2xl">
-                {user.name}
+                {users.name}
               </p>
-              <p className="text-sm font-medium text-gray-600">{user.role}</p>
+              <p className="text-sm font-medium text-gray-600">{users.role}</p>
             </div>
           </div>
           <div className="flex justify-center mt-5 sm:mt-0">

@@ -50,6 +50,8 @@ CREATE TABLE "companies" (
     "deleted_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
+    "nsid" VARCHAR,
+    "nstoken" VARCHAR,
 
     CONSTRAINT "companies_pkey" PRIMARY KEY ("id")
 );
@@ -75,8 +77,8 @@ CREATE TABLE "plantations" (
 CREATE TABLE "receipts" (
     "id" SERIAL NOT NULL,
     "date" TIMESTAMPTZ(6) NOT NULL,
-    "value" VARCHAR(255) NOT NULL,
-    "company_id" INTEGER NOT NULL,
+    "value" DECIMAL NOT NULL,
+    "company_id" INTEGER,
     "deleted_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
@@ -92,8 +94,6 @@ CREATE TABLE "users" (
     "email" VARCHAR(255) NOT NULL,
     "role" VARCHAR(255) NOT NULL,
     "company_id" INTEGER NOT NULL,
-    "store_id" INTEGER,
-    "access_token" VARCHAR(255),
     "deleted_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,

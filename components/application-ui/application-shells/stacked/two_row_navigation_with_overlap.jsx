@@ -88,7 +88,7 @@ export default function Example() {
                           <span className="sr-only">Open user menu</span>
                           <img
                             className="h-8 w-8 rounded-full"
-                            src={user.imageUrl}
+                            src={users.imageUrl}
                             alt=""
                           />
                         </Menu.Button>
@@ -284,16 +284,16 @@ export default function Example() {
                             <div className="flex-shrink-0">
                               <img
                                 className="h-10 w-10 rounded-full"
-                                src={user.imageUrl}
+                                src={users.imageUrl}
                                 alt=""
                               />
                             </div>
                             <div className="ml-3 min-w-0 flex-1">
                               <div className="text-base font-medium text-gray-800 truncate">
-                                {user.name}
+                                {users.name}
                               </div>
                               <div className="text-sm font-medium text-gray-500 truncate">
-                                {user.email}
+                                {users.email}
                               </div>
                             </div>
                             <button

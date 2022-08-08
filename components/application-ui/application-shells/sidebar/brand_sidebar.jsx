@@ -20,7 +20,7 @@ import {
 import { SearchIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import Image from "next/image";
-
+import { signOut } from "next-auth/react";
 const userNavigation = [{ name: "Editar Perfil", href: "#" }];
 
 function classNames(...classes) {
@@ -28,6 +28,7 @@ function classNames(...classes) {
 }
 
 export default function Sidebar(props) {
+  const session = props.session;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [current, setCurrent] = useState("Dashboard");
   const [sidebarNavigation, setSidebarNavigation] = useState([
@@ -127,7 +128,10 @@ export default function Sidebar(props) {
                 </Link>
               ))}
 
-              <a className="cursor-pointer flex items-center w-full p-3 !mt-10 pt-10 text-sm text-gray-500 border-t border-gray-200 rounded-md hover:text-red-500 hover:font-bold font-regular group">
+              <a
+                className="cursor-pointer flex items-center w-full p-3 !mt-10 pt-10 text-sm text-gray-500 border-t border-gray-200 rounded-md hover:text-red-500 hover:font-bold font-regular group"
+                onClick={() => signOut()}
+              >
                 <LogoutIcon
                   className="w-6 h-6 text-gray-500 group-hover:text-red-500"
                   aria-hidden="true"
@@ -156,22 +160,22 @@ export default function Sidebar(props) {
                   <span className="mt-2">{item.name}</span>
                     </a> */}
             </div>
-            <div className="absolute bottom-0 flex flex-shrink-0 p-4 border-t border-gray-200">
+            <div className="absolute bottom-0 flex flex-shrink-0 w-48 p-4 border-t border-gray-200">
               <a href="#" className="flex-shrink-0 block group">
                 <div className="flex items-center">
                   <div>
                     <img
                       className="inline-block w-10 h-10 rounded-full"
-                      src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80"
-                      alt=""
+                      src={session?.user.image}
+                      alt={session?.user.name}
                     />
                   </div>
                   <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-700 group-hover:text-gray-900">
-                      Nome do Cliente
+                    <p className="overflow-hidden text-sm font-medium text-gray-700 w-28 group-hover:text-gray-900 text-ellipsis whitespace-nowrap">
+                      {session?.user.name}
                     </p>
-                    <p className="text-sm font-medium text-gray-500 group-hover:text-gray-700">
-                      Sair
+                    <p className="text-xs font-medium text-green-500 group-hover:text-gray-700">
+                      Editar Perfil
                     </p>
                   </div>
                 </div>
@@ -277,27 +281,6 @@ export default function Sidebar(props) {
                         </a>
                       </div>
                     </nav>
-                    <div className="absolute bottom-0 flex flex-shrink-0 p-4">
-                      <a href="#" className="flex-shrink-0 block group">
-                        <div className="flex items-center">
-                          <div>
-                            <img
-                              className="inline-block w-10 h-10 rounded-full"
-                              src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80"
-                              alt=""
-                            />
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-xs font-medium text-gray-700 group-hover:text-gray-900">
-                              Nome do Cliente
-                            </p>
-                            <p className="text-sm font-medium text-gray-500 group-hover:text-gray-700">
-                              Sair
-                            </p>
-                          </div>
-                        </div>
-                      </a>
-                    </div>
                   </div>
                 </div>
               </Transition.Child>
@@ -331,12 +314,10 @@ export default function Sidebar(props) {
                     <div>
                       <Menu.Button className="flex text-sm rounded-full">
                         <span className="sr-only">Open user menu</span>
-                        <Image
+                        <img
                           className="w-8 h-8 rounded-full"
-                          src="https://parceiros.coclima.com/static/media/avatarPlaceholder.cfb16ca3.png"
+                          src={session?.user.image}
                           alt=""
-                          height={32}
-                          width={32}
                         />
                       </Menu.Button>
                     </div>
@@ -394,7 +375,7 @@ export default function Sidebar(props) {
           <div className="ContentContainer">
             {React.cloneElement(children, {
               status: "status",
-              session: "session",
+              session: session,
               theme: "theme",
             })}
           </div>

@@ -64,3 +64,17 @@ span.swiper-pagination-bullet {
 main {
   min-height: calc(100vh - 4rem);
 }
+
+#selectUser path {
+  color: #0ec164;
+}
+
+#selectUser input {
+  --tw-ring-color: none;
+}
+
+div#react-select-2-group-0-heading,
+div#react-select-2-group-1-heading,
+div#react-select-2-group-2-heading {
+  color: #0ec164;
+}

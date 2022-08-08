@@ -12,87 +12,133 @@ model SequelizeMeta {
 }
 
 model archives {
-  id            String    @id @default(cuid())
-  name          String?   @db.VarChar(255)
+  id            String      @id @unique @default(cuid())
+  name          String?
+  thumbnail     String?
   data          String
-  company_id    Int?
-  partner_id    Int?
-  plantation_id Int?
-  type          String?   @db.VarChar(255)
-  keywords      String?   @db.VarChar(255)
-  deleted_at    DateTime? @db.Timestamptz(6)
-  created_at    DateTime  @db.Timestamptz(6)
-  updated_at    DateTime  @db.Timestamptz(6)
+  partner_id    String
+  partner       companies   @relation(fields: [partner_id], references: [id])
+  plantation_id String
+  plantation    plantations @relation(fields: [plantation_id], references: [id])
+  type          String?
+  keywords      String?
+  deleted_at    DateTime?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now())
 }
 
 model companies {
-  id                            String    @id @default(cuid())
-  name                          String    @db.VarChar(255)
-  email                         String?   @db.VarChar(255)
-  cpfcnpj                       String    @unique @db.VarChar(255)
-  street                        String    @db.VarChar(255)
-  number                        String?   @db.VarChar(255)
-  complement                    String?   @db.VarChar(255)
-  city                          String?   @db.VarChar(255)
-  state                         String?   @db.VarChar(255)
-  district                      String?   @db.VarChar(255)
-  cep                           String?   @db.VarChar(255)
-  phone                         String    @db.VarChar(255)
-  site                          String?   @db.VarChar(255)
-  role                          String    @db.VarChar(255)
-  code                          String?   @db.VarChar(255)
-  api_address                   String?   @db.VarChar(255)
-  access_token                  String?   @db.VarChar(255)
-  refresh_token                 String?   @db.VarChar(255)
-  date_expiration_access_token  DateTime? @db.Timestamptz(6)
-  date_expiration_refresh_token DateTime? @db.Timestamptz(6)
-  date_activated                DateTime? @db.Timestamptz(6)
-  store_id                      String?   @db.VarChar(255)
+  id                            String        @id @unique @default(cuid())
+  name                          String
+  email                         String        @unique
+  cpfcnpj                       String
+  street                        String
+  number                        String?
+  complement                    String?
+  city                          String?
+  state                         String?
+  district                      String?
+  cep                           String?
+  phone                         String
+  site                          String?
+  role                          String
+  code                          String?
+  api_address                   String?
+  access_token                  String?
+  refresh_token                 String?
+  date_expiration_access_token  DateTime?
+  date_expiration_refresh_token DateTime?
+  date_activated                DateTime?
+  store_id                      String?
   logo                          String?
-  deleted_at                    DateTime? @db.Timestamptz(6)
-  created_at                    DateTime  @db.Timestamptz(6)
-  updated_at                    DateTime  @db.Timestamptz(6)
-  nsid                          String?   @db.VarChar
-  nstoken                       String?   @db.VarChar
+  deleted_at                    DateTime?
+  created_at                    DateTime      @default(now())
+  updated_at                    DateTime      @default(now())
+  nsid                          String?
+  nstoken                       String?
+  percentage                    Decimal       @default(1)
+  users                         User[]
+  receipts                      receipts[]
+  handler                       handler[]
+  archives                      archives[]
+  plantations                   plantations[]
 }
 
 model plantations {
-  id          String    @id @default(cuid())
-  date        DateTime  @db.Timestamptz(6)
-  trees       String    @db.VarChar(255)
-  geolocation Json      @db.Json
-  planted     Boolean   @default(false)
-  description String?
-  external    String?
-  company_id  Int?
-  partner_id  Int?
-  receipts_id Int?
-  tree_value  String?   @db.VarChar(255)
-  deleted_at  DateTime? @db.Timestamptz(6)
-  created_at  DateTime  @db.Timestamptz(6)
-  updated_at  DateTime  @db.Timestamptz(6)
+  id           String     @id @unique @default(cuid())
+  date         DateTime   @default(now())
+  geolocation  Json
+  planted      Boolean    @default(false)
+  description  String?
+  external     String?
+  partner_id   String?
+  partner      companies? @relation(fields: [partner_id], references: [id])
+  receipts     receipts[]
+  handler      handler[]
+  archives     archives[]
+  tree_value   Int        @default(2500)
+  observations String?
+  deleted_at   DateTime?
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @default(now())
+}
+
+model handler {
+  id            String      @id @unique @default(cuid())
+  company       companies   @relation(fields: [company_id], references: [id])
+  company_id    String
+  plantations   plantations @relation(fields: [plantation_id], references: [id])
+  plantation_id String
+  value         Int
 }
 
 model receipts {
-  id         String    @id @default(cuid())
-  date       DateTime  @db.Timestamptz(6)
-  value      String    @db.VarChar(255)
-  company_id Int
-  deleted_at DateTime? @db.Timestamptz(6)
-  created_at DateTime  @db.Timestamptz(6)
-  updated_at DateTime  @db.Timestamptz(6)
+  id            String       @id @unique @default(cuid())
+  date          DateTime
+  paid          Boolean      @default(false)
+  value         Int
+  company_id    String
+  plantation_id String?
+  company       companies    @relation(fields: [company_id], references: [id])
+  plantations   plantations? @relation(fields: [plantation_id], references: [id])
+  order_id      String?
+  vendor        String?
+  deleted_at    DateTime?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now())
 }
 
-model users {
-  id               String    @id @default(cuid())
-  name             String    @db.VarChar(255)
-  password         String    @db.VarChar(255)
-  image            String?
-  email            String    @unique
-  role             String    @db.VarChar(255)
-  carbonPercentage Int       @default(2)
-  company_id       Int
-  deleted_at       DateTime? @db.Timestamptz(6)
-  created_at       DateTime  @db.Timestamptz(6)
-  updated_at       DateTime  @db.Timestamptz(6)
+model User {
+  id               String     @id @unique @default(cuid())
+  name             String?
+  password         String?
+  image            String?    @default("/images/default_users.jpg")
+  email            String     @unique
+  emailVerified    DateTime?
+  role             String     @default("User")
+  carbonPercentage Int        @default(2)
+  company_id       String?
+  sessions         Session[]
+  company          companies? @relation(fields: [company_id], references: [id])
+  deleted_at       DateTime?
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @default(now())
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

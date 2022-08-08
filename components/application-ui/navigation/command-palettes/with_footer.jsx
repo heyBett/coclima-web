@@ -68,7 +68,7 @@ export default function Example() {
       ? users
       : query === "" || rawQuery.startsWith("#")
       ? []
-      : users.filter((user) => user.name.toLowerCase().includes(query));
+      : users.filter((user) => users.name.toLowerCase().includes(query));
 
   return (
     <Transition.Root
@@ -168,7 +168,7 @@ export default function Example() {
                     <ul className="-mx-4 mt-2 text-sm text-gray-700">
                       {filteredUsers.map((user) => (
                         <Combobox.Option
-                          key={user.id}
+                          key={users.id}
                           value={user}
                           className={({ active }) =>
                             classNames(
@@ -178,12 +178,12 @@ export default function Example() {
                           }
                         >
                           <img
-                            src={user.imageUrl}
+                            src={users.imageUrl}
                             alt=""
                             className="h-6 w-6 flex-none rounded-full"
                           />
                           <span className="ml-3 flex-auto truncate">
-                            {user.name}
+                            {users.name}
                           </span>
                         </Combobox.Option>
                       ))}

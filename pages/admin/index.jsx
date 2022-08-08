@@ -1,23 +1,39 @@
 import Head from "next/head";
 import { useState } from "react";
 import Image from "next/image";
-import Header from "../components/application-ui/headings/page-headings/with_actions_and_breadcrumbs_on_dark";
-import Hello from "../components/application-ui/data-display/stats/with_brand_icon";
-import Users from "../components/application-ui/lists/tables/with_avatars_and_multi_line_content";
-import Options from "../components/application-ui/navigation/tabs/bar_with_underline";
+import Header from "../../components/application-ui/headings/page-headings/with_actions_and_breadcrumbs_on_dark";
+import Hello from "../../components/application-ui/data-display/stats/with_brand_icon";
+import Users from "../../components/application-ui/lists/tables/with_avatars_and_multi_line_content";
+import Companies from "../../components/application-ui/lists/tables/with_avatars_and_multi_line_content2";
+import Partners from "../../components/application-ui/lists/tables/with_avatars_and_multi_line_content3";
+import Plantations from "../../components/application-ui/lists/tables/with_avatars_and_multi_line_content4";
+import Options from "../../components/application-ui/navigation/tabs/bar_with_underline";
+import useSWR from "swr";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Home() {
-  const [current, setCurrent] = useState("user");
+  const [current, setCurrent] = useState("users");
   const [tabs, setTabs] = useState([
-    { name: "Usuários", scope: "user", current: true },
-    { name: "Empresas", scope: "company", current: false },
-    { name: "Parceiros", scope: "partner", current: false },
-    { name: "Plantios", scope: "plantation", current: false },
+    { name: "Usuários", scope: "users", current: true },
+    { name: "Empresas", scope: "companies", current: false },
+    { name: "Parceiros", scope: "partners", current: false },
+    { name: "Plantios", scope: "plantations", current: false },
   ]);
+
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const { data } = useSWR(`/api/admin`, fetcher);
+
+  const users = data?.users;
+  const companies = data?.companies;
+  const partners = data?.partners;
+  const plantations = data?.plantations;
+
+  if (!data) {
+    return <></>;
+  }
 
   function CurrentNav(scope) {
     setCurrent(scope);
@@ -92,7 +108,15 @@ export default function Home() {
             </nav>
           </div>
         </div>
-        {current === "user" && <Users></Users>}
+        {current === "users" && <Users users={users}></Users>}
+        {current === "companies" && (
+          <Companies companies={companies}></Companies>
+        )}
+
+        {current === "partners" && <Partners partners={partners}></Partners>}
+        {current === "plantations" && (
+          <Plantations plantations={plantations}></Plantations>
+        )}
       </main>
     </div>
   );

@@ -16,58 +16,33 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
+import useSWR from "swr";
 
 export default function Home() {
   const [tab, setTab] = useState("Plantio");
-  const [data, setData] = useState([]);
+  const [graph, setGraph] = useState([]);
+  const [legenda, setLegenda] = useState("Árvores Plantadas:");
   const [style, setStyle] = useState("Linha");
+
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const { data, error } = useSWR("/api/views/dashboard", fetcher, {
+    refreshInterval: 120000,
+  });
 
   useEffect(() => {
     if (tab === "Plantio") {
-      setData([
-        {
-          name: "Jan/22",
-          plantations: 4000,
-          pv: 2400,
-          amt: 2400,
-        },
-        {
-          name: "Fev/22",
-          plantations: 3000,
-          pv: 1398,
-          amt: 2210,
-        },
-        {
-          name: "Mar/22",
-          plantations: 2000,
-          pv: 9800,
-          amt: 2290,
-        },
-      ]);
+      setGraph(data?.graph.treeGraph);
+      setLegenda("Árvores Plantadas:");
     }
     if (tab === "Repasse") {
-      setData([
-        {
-          name: "Jan/22",
-          plantations: 3000,
-          pv: 2400,
-          amt: 2400,
-        },
-        {
-          name: "Fev/22",
-          plantations: 6000,
-          pv: 1398,
-          amt: 2210,
-        },
-        {
-          name: "Mar/22",
-          plantations: 1000,
-          pv: 9800,
-          amt: 2290,
-        },
-      ]);
+      setGraph(data?.graph.valueGraph);
+      setLegenda("Valor (R$):");
     }
-  }, [tab]);
+  }, [tab, data]);
+
+  if (!data) {
+    return <></>;
+  }
 
   return (
     <div>
@@ -76,56 +51,56 @@ export default function Home() {
       </Head>
 
       <main className="flex flex-col justify-between m-6 sm:mx-10 sm:mt-10">
-        <Hello></Hello>
+        <Hello data={data}></Hello>
 
         <div className="">
-          <div className="flex justify-between mb-10">
+          <div className="flex flex-row justify-between mb-10">
             {tab === "Plantio" ? (
-              <div>
-                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-l-lg">
+              <div className="flex flex-col sm:flex-row">
+                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-t-lg sm:rounded-r-none sm:rounded-l-lg">
                   Plantio
                 </button>
                 <button
                   onClick={() => setTab("Repasse")}
-                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-r-lg"
+                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-b-lg sm:rounded-l-none sm:rounded-r-lg"
                 >
                   Repasse
                 </button>
               </div>
             ) : (
-              <div>
+              <div className="flex flex-col sm:flex-row">
                 <button
                   onClick={() => setTab("Plantio")}
-                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-l-lg"
+                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-t-lg sm:rounded-r-none sm:rounded-l-lg"
                 >
                   Plantio
                 </button>
-                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-r-lg">
+                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-b-lg sm:rounded-l-none sm:rounded-r-lg">
                   Repasse
                 </button>
               </div>
             )}
             {style === "Linha" ? (
-              <div>
-                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-l-lg">
+              <div className="flex flex-col sm:flex-row">
+                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-t-lg sm:rounded-r-none sm:rounded-l-lg">
                   Linha
                 </button>
                 <button
                   onClick={() => setStyle("Barra")}
-                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-r-lg"
+                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-b-lg sm:rounded-l-none sm:rounded-r-lg"
                 >
                   Barra
                 </button>
               </div>
             ) : (
-              <div>
+              <div className="flex flex-col sm:flex-row">
                 <button
                   onClick={() => setStyle("Linha")}
-                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-l-lg"
+                  className="px-5 py-2 font-medium text-green-500 uppercase bg-gray-200 rounded-t-lg sm:rounded-r-none sm:rounded-l-lg"
                 >
                   Linha
                 </button>
-                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-r-lg">
+                <button className="px-5 py-2 font-medium text-white uppercase bg-green-500 rounded-b-lg sm:rounded-l-none sm:rounded-r-lg">
                   Barra
                 </button>
               </div>
@@ -135,43 +110,41 @@ export default function Home() {
           <ResponsiveContainer width="100%" height={300}>
             {style === "Linha" ? (
               <AreaChart
-                data={data}
+                data={graph}
                 margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
               >
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="month" />
+                <YAxis dataKey="value" />
                 <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
-                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                </linearGradient>
 
                 <Area
                   animationEasing="ease-in-out"
                   type="natural"
                   dot={true}
-                  dataKey="plantations"
+                  dataKey="value"
                   stroke="#0A8F4A"
                   fill="#0EC164"
                   fillOpacity={1}
+                  name={legenda}
                 />
               </AreaChart>
             ) : (
               <BarChart
-                data={data}
+                data={graph}
                 margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
                 <Bar
                   animationEasing="ease-in-out"
-                  dataKey="plantations"
+                  dataKey="value"
                   label="Plantios"
                   fill="#0EC164"
+                  name={legenda}
                 />
               </BarChart>
             )}

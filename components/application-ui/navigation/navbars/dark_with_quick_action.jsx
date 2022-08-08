@@ -104,7 +104,7 @@ export default function Example() {
                         <span className="sr-only">Open user menu</span>
                         <img
                           className="h-8 w-8 rounded-full"
-                          src={user.imageUrl}
+                          src={users.imageUrl}
                           alt=""
                         />
                       </Menu.Button>
@@ -166,16 +166,16 @@ export default function Example() {
                 <div className="flex-shrink-0">
                   <img
                     className="h-10 w-10 rounded-full"
-                    src={user.imageUrl}
+                    src={users.imageUrl}
                     alt=""
                   />
                 </div>
                 <div className="ml-3">
                   <div className="text-base font-medium text-white">
-                    {user.name}
+                    {users.name}
                   </div>
                   <div className="text-sm font-medium text-gray-400">
-                    {user.email}
+                    {users.email}
                   </div>
                 </div>
                 <button

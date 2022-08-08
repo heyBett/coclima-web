@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SequelizeMeta {
+  name String @id @db.VarChar(255)
+}
+
+model archives {
+  id            String    @id @default(cuid())
+  name          String?
+  data          String
+  company_id    Int?
+  partner_id    Int?
+  plantation_id Int?
+  type          String?
+  keywords      String?
+  deleted_at    DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now())
+}
+
+model companies {
+  id                            String        @id @default(cuid())
+  name                          String
+  email                         String        @unique
+  cpfcnpj                       String        @unique
+  street                        String
+  number                        String?
+  complement                    String?
+  city                          String?
+  state                         String?
+  district                      String?
+  cep                           String?
+  phone                         String
+  site                          String?
+  role                          String
+  code                          String?
+  api_address                   String?
+  access_token                  String?
+  refresh_token                 String?
+  date_expiration_access_token  DateTime?
+  date_expiration_refresh_token DateTime?
+  date_activated                DateTime?
+  store_id                      String?
+  logo                          String?
+  deleted_at                    DateTime?
+  created_at                    DateTime      @default(now())
+  updated_at                    DateTime      @default(now())
+  nsid                          String?
+  nstoken                       String?
+  users                         users[]
+  receipts                      receipts[]
+  partner                       partners[]
+  plantations                   plantations[]
+}
+
+model plantations {
+  id          String      @id @default(cuid())
+  date        DateTime
+  trees       String
+  geolocation Json
+  planted     Boolean     @default(false)
+  description String?
+  external    String?
+  company_id  Int?
+  partner_id  Int?
+  receipts_id Int?
+  partner     partners[]
+  receipts    receipts[]
+  company     companies[]
+  tree_value  Int         @default(25)
+  deleted_at  DateTime?
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @default(now())
+}
+
+model partners {
+  id          String        @id @default(cuid())
+  date        DateTime
+  value       Int
+  company_id  Int?
+  company     companies[]
+  plantations plantations[]
+  deleted_at  DateTime?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
+}
+
+model receipts {
+  id          String        @id @default(cuid())
+  date        DateTime
+  value       Decimal
+  company_id  Int?
+  company     companies[]
+  plantations plantations[]
+  deleted_at  DateTime?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
+}
+
+model users {
+  id               String      @id @default(cuid())
+  name             String?
+  password         String
+  image            String?
+  email            String      @unique
+  role             String
+  carbonPercentage Int         @default(2)
+  company_id       Int?
+  company          companies[]
+  deleted_at       DateTime?
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @default(now())
+}

@@ -13,44 +13,45 @@ import {
   PrimaryLogo,
 } from "../../../vectors/custom";
 
-const stats = [
-  {
-    id: 1,
-    name: "Árvores Plantadas",
-    stat: "71,897",
-    icon: TreeIcon,
-    change: "122",
-    changeType: "increase",
-    preffix: "",
-    suffix: "",
-  },
-  {
-    id: 2,
-    name: "Carbono Compensado",
-    stat: "58.16",
-    icon: CarbonIcon,
-    change: "5.4",
-    changeType: "increase",
-    preffix: "",
-    suffix: "g",
-  },
-  {
-    id: 3,
-    name: "Capital Repassado",
-    stat: "10000",
-    icon: DollarIcon,
-    change: "3.2",
-    changeType: "decrease",
-    preffix: "R$ ",
-    suffix: "",
-  },
-];
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function Cards(props) {
+  const data = props.data;
+  const stats = [
+    {
+      id: 1,
+      name: "Árvores Plantadas",
+      stat: data?.trees.toFixed(0),
+      icon: TreeIcon,
+      change: "122",
+      changeType: "increase",
+      preffix: "",
+      suffix: "",
+    },
+    {
+      id: 2,
+      name: "Carbono Compensado",
+      stat: (data?.carbon / 1000).toFixed(2),
+      icon: CarbonIcon,
+      change: "5.4",
+      changeType: "increase",
+      preffix: "",
+      suffix: "toneladas",
+    },
+    {
+      id: 3,
+      name: "Capital Repassado",
+      stat: (data?.value).toFixed(2),
+      icon: DollarIcon,
+      change: "3.2",
+      changeType: "decrease",
+      preffix: "R$ ",
+      suffix: "",
+    },
+  ];
+
   return (
     <div>
       <h1 className="text-4xl font-medium text-green-500">Dashboard</h1>
@@ -79,7 +80,7 @@ export default function Example() {
             <dd className="flex items-baseline ml-16 ">
               <p className="text-2xl font-semibold text-white">
                 <span className="text-xs">{item.preffix}</span>
-                {item.stat}
+                {item.stat.toString().replace(".", ",")}
                 <span className="text-sm"> {item.suffix}</span>
               </p>
             </dd>
