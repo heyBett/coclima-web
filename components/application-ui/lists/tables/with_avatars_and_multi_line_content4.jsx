@@ -70,6 +70,7 @@ export default function Example(props) {
                           <div className="font-semibold text-green-500">
                             <a
                               target="_blank"
+                              rel="noreferrer"
                               href={
                                 "http://www.google.com/maps/place/" +
                                 plantation.geolocation.lat +

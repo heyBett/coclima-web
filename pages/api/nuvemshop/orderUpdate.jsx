@@ -1,9 +1,7 @@
 import fetch from "node-fetch";
 
-
-
 export default function handler(req, res) {
- 
+  /* 
 //Login to get an Admin bearer Token
   const optionsLogin = {
     method: 'POST',
@@ -48,9 +46,7 @@ export default function handler(req, res) {
   };
   const requestReceipt = await fetch('https://api.coclima.com/receipts', optionsReceipt)
   const responseReceipt = await requestReceipt.json()
-  console.log(responseReceipt)
+  console.log(responseReceipt) */
 
   return res.status(200).json({});
-
-
 }

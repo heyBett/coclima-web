@@ -66,6 +66,27 @@ export default function Home(props) {
     return item.company_id === session.user.company_id;
   }
 
+  const PlantationOf = (props) => {
+    const items = props.items;
+    return (
+      items.plantation.handler
+        .map((item) => item)
+        .map((item) => item.value)
+        .reduce((a, b) => a + b, 0) / items.plantation.tree_value
+    ).toFixed(0);
+  };
+
+  const OfYours = (props) => {
+    const items = props.items;
+    return (
+      items.plantation.handler
+        .filter(yourTrees)
+        .map((item) => item)
+        .map((item) => item.value)
+        .reduce((a, b) => a + b, 0) / items.plantation.tree_value
+    ).toFixed(0);
+  };
+
   const Pin = (items) => (
     <div
       className="flex flex-col items-center justify-center w-40 test"
@@ -73,25 +94,11 @@ export default function Home(props) {
     >
       <div className="px-2 py-1">
         <p className="px-2 py-1.5 text-center text-white bg-green-600 rounded-t-lg">
-          Plantação de{" "}
-          {(
-            items.plantation.handler
-              .map((item) => item)
-              .map((item) => item.value)
-              .reduce((a, b) => a + b, 0) / items.plantation.tree_value
-          ).toFixed(0)}{" "}
-          Árvores
+          Plantação de <PlantationOf items={items}></PlantationOf> Árvores
         </p>
         <p className="px-3 py-2 text-center text-green-600 bg-white rounded-b-lg">
           <span className="font-bold">
-            {(
-              items.plantation.handler
-                .filter(yourTrees)
-                .map((item) => item)
-                .map((item) => item.value)
-                .reduce((a, b) => a + b, 0) / items.plantation.tree_value
-            ).toFixed(0)}{" "}
-            são suas!
+            <OfYours items={items}></OfYours> são suas!
           </span>
         </p>
       </div>
@@ -178,6 +185,7 @@ export default function Home(props) {
             >
               {data.plantations.filter(isPlanted).map((plantation) => (
                 <Pin
+                  key={plantation.id}
                   plantation={plantation}
                   lat={plantation.geolocation.lat}
                   lng={plantation.geolocation.lng}

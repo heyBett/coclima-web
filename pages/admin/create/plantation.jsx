@@ -218,7 +218,9 @@ export default function Example() {
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         >
                           {data?.partners.map((partner) => (
-                            <option value={partner.id}>{partner.name}</option>
+                            <option key={partner.id} value={partner.id}>
+                              {partner.name}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -372,7 +374,10 @@ export default function Example() {
                         </label>
                         <div className="mt-4 space-x-2">
                           {photos.map((photo) => (
-                            <span className="inline-block w-24 h-24 overflow-hidden bg-gray-100 rounded-lg test2">
+                            <span
+                              key={photo.data}
+                              className="inline-block w-24 h-24 overflow-hidden bg-gray-100 rounded-lg test2"
+                            >
                               <div className="absolute flex justify-end w-24 text-black">
                                 <XIcon
                                   onClick={() => removeAsset(photo)}

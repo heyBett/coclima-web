@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 
 export default function handler(req, res) {
   
-  console.log(process.env.COCLIMA_ADMIN_LOGIN)
+ /*  console.log(process.env.COCLIMA_ADMIN_LOGIN)
   console.log(process.env.COCLIMA_ADMIN_PASSWORD)
 
   //Login to get an Admin bearer Token
@@ -164,15 +164,8 @@ export default function handler(req, res) {
   const urlModal = 'https://api.tiendanube.com/v1/' + store_id + '/scripts'
   const requestModal = await fetch(urlModal, optionsModal)
   const responseModal = await requestModal.json()
-  console.log(responseModal)
-  /*  const optionsUpdateWebhooks = {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json', 'User-Agent': 'CoClima(https://coclima.com)', 'Agent': 'Luiz Bett(luiz@codx.dev', 'Authentication': 'bearer ' + access_token },
-     body: JSON.stringify({ url: 'https://api.coclima.com/orderUpdatedNS/', event: 'order/updated' })
-   };
-   const urlUpdateWebhooks = 'https://api.tiendanube.com/v1/' + store_id + '/webhooks'
-   const requestUpdateWebhooks = await fetch(urlUpdateWebhooks, optionsUpdateWebhooks)
-   const responseUpdateWebhooks = await requestUpdateWebhooks.json() */
+  console.log(responseModal) */
+  
 
 
   return res.status(200).json({});

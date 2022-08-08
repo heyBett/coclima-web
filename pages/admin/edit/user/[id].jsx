@@ -149,7 +149,9 @@ export default function Example() {
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         >
                           {data?.companies.map((company) => (
-                            <option value={company.id}>{company.name}</option>
+                            <option key={company.id} value={company.id}>
+                              {company.name}
+                            </option>
                           ))}
                         </select>
                       </div>
