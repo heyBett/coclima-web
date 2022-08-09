@@ -99,20 +99,6 @@ export default function Example() {
   const onSubmit = async (data) => {
     data.photos = photos;
 
-    console.log({
-      handler: data.companyData?.filter(isSelected),
-      photos: data.photos,
-      partner: data.partner,
-      planted: Boolean(data.planted === "true"),
-      tree_cost: parseInt(data.tree_cost, 10),
-      description: data.description,
-      observations: data.observations,
-      geolocation: {
-        lat: parseFloat(data.latitude),
-        lng: parseFloat(data.longitude),
-      },
-      external: data.external,
-    });
     disabledButton();
     if (data.companyData === undefined) {
       alert("Escolha ao menos uma empresa");

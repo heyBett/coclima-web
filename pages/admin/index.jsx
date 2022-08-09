@@ -9,7 +9,7 @@ import Partners from "../../components/application-ui/lists/tables/with_avatars_
 import Plantations from "../../components/application-ui/lists/tables/with_avatars_and_multi_line_content4";
 import Options from "../../components/application-ui/navigation/tabs/bar_with_underline";
 import useSWR from "swr";
-
+import Loader from "../../components/loader";
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -32,7 +32,7 @@ export default function Home() {
   const plantations = data?.plantations;
 
   if (!data) {
-    return <></>;
+    return <Loader></Loader>;
   }
 
   function CurrentNav(scope) {

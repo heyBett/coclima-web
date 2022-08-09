@@ -4,6 +4,7 @@ import Sidebar from "../components/application-ui/application-shells/sidebar/bra
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { Screen2 } from "../components/application-ui/forms/sign-in-forms/split_screen2";
+import Loader from "./loader";
 
 export function Layout({ children }) {
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ export function Layout({ children }) {
     <Head>
       <title>COCLIMA</title>
     </Head>;
-    return <h1>Carregando</h1>;
+    return <Loader></Loader>;
   }
 
   return (

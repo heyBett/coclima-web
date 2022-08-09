@@ -77,6 +77,107 @@ export function PrimaryLogo(props) {
     </svg>
   );
 }
+
+export function BigLogo(props) {
+  const className = props.className;
+  const filled = props.filled;
+  return (
+    <svg
+      className={className}
+      width="320"
+      height="320"
+      viewBox="0 0 320 320"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g filter="url(#filter0_d_111_3290)">
+        <rect
+          x="9"
+          y="7"
+          width="302"
+          height="302"
+          rx="151"
+          fill="#F8F8F8"
+          stroke="white"
+          strokeWidth="2"
+        />
+        <path
+          d="M68.6202 133.923C68.6202 96.7519 98.7531 66.619 135.924 66.619C173.095 66.619 203.228 96.7519 203.228 133.923V192.813C203.228 197.46 199.461 201.226 194.815 201.226H135.924C98.7531 201.226 68.6202 171.094 68.6202 133.923Z"
+          fill="#0EC164"
+        />
+        <path
+          d="M252.584 185.522C252.584 222.693 222.953 252.826 186.402 252.826C149.85 252.826 120.22 222.693 120.22 185.522V121.145C120.22 119.529 121.508 118.218 123.097 118.218H186.402C222.953 118.218 252.584 148.351 252.584 185.522Z"
+          fill="#0EC164"
+        />
+        <path
+          opacity="0.7"
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M201.135 120.228C202.064 124.666 202.552 129.266 202.552 133.981V192.44C202.552 197.052 198.813 200.791 194.201 200.791H135.741C130.765 200.791 125.916 200.247 121.251 199.216C120.322 194.778 119.834 190.177 119.834 185.463V121.557C119.834 119.953 121.134 118.652 122.738 118.652H186.645C191.621 118.652 196.47 119.196 201.135 120.228Z"
+          fill="#01823F"
+        />
+        <mask
+          id="mask0_111_3290"
+          style={{ maskType: "alpha" }}
+          maskUnits="userSpaceOnUse"
+          x="119"
+          y="118"
+          width="135"
+          height="135"
+        >
+          <path
+            d="M253.455 185.462C253.455 222.362 223.543 252.274 186.645 252.274C149.746 252.274 119.834 222.362 119.834 185.462V121.557C119.834 119.952 121.134 118.652 122.738 118.652H186.645C223.543 118.652 253.455 148.564 253.455 185.462Z"
+            fill="#4BD070"
+            fillOpacity="0.8"
+          />
+        </mask>
+        <g mask="url(#mask0_111_3290)">
+          <path
+            d="M118.976 118.957L119.265 118.089C176.821 145.565 193.307 188.66 193.307 188.66C170.88 151.539 129.876 126.127 118.976 121.27"
+            fill="#11482B"
+          />
+        </g>
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_111_3290"
+          x="0"
+          y="0"
+          width="320"
+          height="320"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset dy="2" />
+          <feGaussianBlur stdDeviation="4" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_111_3290"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_111_3290"
+            result="shape"
+          />
+        </filter>
+      </defs>
+    </svg>
+  );
+}
+
 export function DashboardIcon(props) {
   const className = props.className;
   const filled = props.filled;

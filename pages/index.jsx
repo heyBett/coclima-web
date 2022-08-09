@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import useSWR from "swr";
+import Loader from "../components/loader";
 
 export default function Home() {
   const [tab, setTab] = useState("Plantio");
@@ -41,7 +42,7 @@ export default function Home() {
   }, [tab, data]);
 
   if (!data) {
-    return <></>;
+    return <Loader></Loader>;
   }
 
   return (

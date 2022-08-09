@@ -23,7 +23,7 @@ export default async function handle(req, res) {
       where: {
         handler: {
           some: {
-            id: result.handler.id,
+            id: { in: result.handler.map((item) => item.id) },
           },
         },
       },

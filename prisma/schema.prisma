@@ -31,7 +31,7 @@ model companies {
   id                            String        @id @unique @default(cuid())
   name                          String
   email                         String        @unique
-  cpfcnpj                       String
+  cpfcnpj                       String?       @unique
   street                        String
   number                        String?
   complement                    String?
@@ -102,7 +102,7 @@ model receipts {
   company       companies    @relation(fields: [company_id], references: [id])
   plantations   plantations? @relation(fields: [plantation_id], references: [id])
   order_id      String?
-  vendor        String?
+  vendor        String?      @default("Interno")
   deleted_at    DateTime?
   created_at    DateTime     @default(now())
   updated_at    DateTime     @default(now())

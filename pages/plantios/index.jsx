@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import GoogleMapReact from "google-map-react";
 import useSWR from "swr";
-
+import Loader from "../../components/loader";
 const defaultProps = {
   center: {
     lat: -23.014434852616468,
@@ -102,12 +102,18 @@ export default function Home(props) {
           </span>
         </p>
       </div>
-      <img className="" src="/images/circledIcon.png"></img>
+      <Image
+        width={50}
+        height={50}
+        quality={100}
+        className=""
+        src="/images/circledIcon.png"
+      ></Image>
     </div>
   );
 
   if (!data) {
-    return <></>;
+    return <Loader></Loader>;
   }
 
   return (

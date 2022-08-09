@@ -1,16 +1,17 @@
 import useSWR from "swr";
 import { useRouter } from "next/router";
 import { format, parseISO } from "date-fns";
-
+import Image from "next/image";
+import Loader from "../../../loader";
 export default function Example() {
   const id = useRouter().query.id;
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/views/plantations/${id}`, fetcher);
 
-  if (!data)
-    return (
-      <ul
+  if (!data) return <Loader></Loader>;
+  {
+    /* <ul
         role="list"
         className="grid grid-cols-3 p-5 my-4 bg-white rounded-lg lg:p-2 xl:p-5 gap-x-2 gap-y-2 sm:grid-cols-3 sm:gap-x-2 xl:gap-y-4 lg:grid-cols-3 xl:gap-x-4"
       >
@@ -95,9 +96,8 @@ export default function Example() {
             />
           </div>
         </li>
-      </ul>
-    );
-
+      </ul> */
+  }
   return (
     <div className="">
       <h1 className="text-4xl font-medium text-green-500">
@@ -119,8 +119,10 @@ export default function Example() {
       >
         {data?.archives.map((file) => (
           <li key={file.id} className="relative">
-            <div className="block w-full overflow-hidden bg-gray-100 rounded-lg group aspect-w-10 aspect-h-10 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-green-500">
-              <img
+            <div className="block w-full overflow-hidden bg-gray-100 rounded-lg group aspect-1 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-green-500">
+              <Image
+                height={500}
+                width={500}
                 src={file.data}
                 alt="Árvore"
                 className="object-cover pointer-events-none group-hover:opacity-75"

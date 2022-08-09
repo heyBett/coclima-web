@@ -9,6 +9,7 @@ import {
   ViewGridIcon,
   XIcon,
   LogoutIcon,
+  CashIcon,
 } from "@heroicons/react/solid";
 import {
   PrimaryLogo,
@@ -43,7 +44,12 @@ export default function Sidebar(props) {
       href: "/marketing",
       icon: MarketingIcon,
     },
-
+    {
+      name: "Recursos",
+      href: "/recursos",
+      icon: CashIcon,
+      admin: true,
+    },
     {
       name: "Administrativo",
       href: "/admin",
@@ -77,14 +83,6 @@ export default function Sidebar(props) {
   }
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-50">
-        <body class="h-full overflow-hidden">
-        ```
-      */}
       <div className="flex h-full">
         {/* Narrow sidebar */}
         <div className="fixed z-10 hidden w-48 h-screen overflow-y-auto bg-white md:block">
@@ -138,27 +136,6 @@ export default function Sidebar(props) {
                 />
                 <span className="ml-3">Sair</span>
               </a>
-
-              {/*} <a
-                  
-                  key={item.name}
-                  href={item.href}
-                  className={classNames(
-                    item.current ? 'bg-gray-800 text-white' : 'text-gray-100 hover:bg-gray-800 hover:text-white',
-                    'group w-full p-3 rounded-md flex flex-col items-center text-xs font-medium'
-                  )}
-                  aria-current={item.current ? 'page' : undefined}
-                > 
-                  
-                  <item.icon
-                    className={classNames(
-                      item.current ? 'text-white' : 'text-gray-300 group-hover:text-white',
-                      'h-6 w-6'
-                    )}
-                    aria-hidden="true"
-                  />
-                  <span className="mt-2">{item.name}</span>
-                    </a> */}
             </div>
             <div className="absolute bottom-0 flex flex-shrink-0 w-48 p-4 border-t border-gray-200">
               <a href="#" className="flex-shrink-0 block group">

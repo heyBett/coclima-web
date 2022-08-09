@@ -1,6 +1,8 @@
 import Link from "next/link";
 import useSWR from "swr";
 import { format, parseISO } from "date-fns";
+import Image from "next/image";
+import Loader from "../../../loader";
 
 export default function Example() {
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
@@ -15,7 +17,7 @@ export default function Example() {
   const plantations = data?.filter(isPlanted);
 
   if (!data) {
-    return <></>;
+    return <Loader></Loader>;
   }
 
   return (
@@ -28,18 +30,22 @@ export default function Example() {
           <Link href={"/plantios/" + plantation.id}>
             <a>
               <div className="flex flex-col px-4 pt-4 bg-white rounded-lg shadow-sm">
-                <div className="block w-full overflow-hidden bg-gray-100 rounded-lg group aspect-w-10 aspect-h-7 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-indigo-500">
+                <div className="block w-full overflow-hidden bg-gray-100 rounded-lg aspect-1 group focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-indigo-500">
                   {plantation.archives.length > 0 ? (
-                    <img
+                    <Image
                       src={plantation.archives[0].data}
                       alt="Image of the plantation"
-                      className="object-cover pointer-events-none group-hover:opacity-75"
+                      className="object-cover pointer-events-none group-hover:opacity-75 "
+                      height={500}
+                      width={500}
                     />
                   ) : (
-                    <img
-                      src="images/default_tree.jpg"
+                    <Image
+                      src="/images/default_tree.jpg"
                       alt="Image of the plantation"
                       className="object-cover pointer-events-none group-hover:opacity-75"
+                      height={500}
+                      width={500}
                     />
                   )}
                 </div>

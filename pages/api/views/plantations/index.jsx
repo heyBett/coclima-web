@@ -21,7 +21,7 @@ export default async function handle(req, res) {
                 tree_value: true,
                 date: true,
                 geolocation: true,
-                /* archives: true, */
+
                 created_at: true,
                 partner: {
                   select: {
@@ -53,7 +53,7 @@ export default async function handle(req, res) {
       where: {
         handler: {
           some: {
-            id: result.handler.id,
+            id: { in: result.handler.map((item) => item.id) },
           },
         },
       },

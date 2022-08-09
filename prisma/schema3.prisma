@@ -12,24 +12,26 @@ model SequelizeMeta {
 }
 
 model archives {
-  id            String    @id @default(cuid())
+  id            String      @id @unique @default(cuid())
   name          String?
+  thumbnail     String?
   data          String
-  company_id    Int?
-  partner_id    Int?
-  plantation_id Int?
+  partner_id    String
+  partner       companies   @relation(fields: [partner_id], references: [id])
+  plantation_id String
+  plantation    plantations @relation(fields: [plantation_id], references: [id])
   type          String?
   keywords      String?
   deleted_at    DateTime?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @default(now())
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now())
 }
 
 model companies {
-  id                            String        @id @default(cuid())
+  id                            String        @id @unique @default(cuid())
   name                          String
   email                         String        @unique
-  cpfcnpj                       String        @unique
+  cpfcnpj                       String?
   street                        String
   number                        String?
   complement                    String?
@@ -54,67 +56,89 @@ model companies {
   updated_at                    DateTime      @default(now())
   nsid                          String?
   nstoken                       String?
-  users                         users[]
+  percentage                    Decimal       @default(1)
+  users                         User[]
   receipts                      receipts[]
-  partner                       partners[]
+  handler                       handler[]
+  archives                      archives[]
   plantations                   plantations[]
 }
 
 model plantations {
-  id          String      @id @default(cuid())
-  date        DateTime
-  trees       String
-  geolocation Json
-  planted     Boolean     @default(false)
-  description String?
-  external    String?
-  company_id  Int?
-  partner_id  Int?
-  receipts_id Int?
-  partner     partners[]
-  receipts    receipts[]
-  company     companies[]
-  tree_value  Int         @default(25)
-  deleted_at  DateTime?
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @default(now())
+  id           String     @id @unique @default(cuid())
+  date         DateTime   @default(now())
+  geolocation  Json
+  planted      Boolean    @default(false)
+  description  String?
+  external     String?
+  partner_id   String?
+  partner      companies? @relation(fields: [partner_id], references: [id])
+  receipts     receipts[]
+  handler      handler[]
+  archives     archives[]
+  tree_value   Int        @default(2500)
+  observations String?
+  deleted_at   DateTime?
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @default(now())
 }
 
-model partners {
-  id          String        @id @default(cuid())
-  date        DateTime
-  value       Int
-  company_id  Int?
-  company     companies[]
-  plantations plantations[]
-  deleted_at  DateTime?
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @default(now())
+model handler {
+  id            String      @id @unique @default(cuid())
+  company       companies   @relation(fields: [company_id], references: [id])
+  company_id    String
+  plantations   plantations @relation(fields: [plantation_id], references: [id])
+  plantation_id String
+  value         Int
 }
 
 model receipts {
-  id          String        @id @default(cuid())
-  date        DateTime
-  value       Decimal
-  company_id  Int?
-  company     companies[]
-  plantations plantations[]
-  deleted_at  DateTime?
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @default(now())
+  id            String       @id @unique @default(cuid())
+  date          DateTime
+  paid          Boolean      @default(false)
+  value         Int
+  company_id    String
+  plantation_id String?
+  company       companies    @relation(fields: [company_id], references: [id])
+  plantations   plantations? @relation(fields: [plantation_id], references: [id])
+  order_id      String?
+  vendor        String?
+  deleted_at    DateTime?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now())
 }
 
-model users {
-  id               String      @id @default(cuid())
+model User {
+  id               String    @id @unique @default(cuid())
   name             String?
-  password         String
-  image            String?
-  email            String      @unique
-  role             String
-  carbonPercentage Int         @default(2)
-  company_id       Int?
-  company          companies[]
+  password         String?
+  image            String?   @default("/images/default_users.jpg")
+  email            String    @unique
+  emailVerified    DateTime?
+  role             String    @default("User")
+  carbonPercentage Int       @default(2)
+  company_id       String
+  sessions         Session[]
+  company          companies @relation(fields: [company_id], references: [id])
   deleted_at       DateTime?
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @default(now())
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now())
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

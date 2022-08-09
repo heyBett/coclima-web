@@ -24,6 +24,11 @@ export default function Example() {
   const { data: user } = useSWR(url, fetcher);
   const { data } = useSWR(`/api/admin`, fetcher);
 
+  const companies = data?.companies;
+  const partners = data?.partners;
+
+  const companiesAndPartners = companies?.concat(partners);
+
   useEffect(() => {
     reset();
     setProfileImage(user?.image);
@@ -148,7 +153,7 @@ export default function Example() {
                           id="company"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         >
-                          {data?.companies.map((company) => (
+                          {companiesAndPartners?.map((company) => (
                             <option key={company.id} value={company.id}>
                               {company.name}
                             </option>

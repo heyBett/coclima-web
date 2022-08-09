@@ -18,7 +18,6 @@ export default function Example() {
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin/`, fetcher);
-  console.log(data?.companies);
 
   //New Comment
   function disabledButton() {
