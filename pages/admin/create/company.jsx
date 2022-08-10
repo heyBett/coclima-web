@@ -8,10 +8,11 @@ import {
 import Head from "next/head";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function Example() {
   const { register, handleSubmit, reset } = useForm();
-
+  const router = useRouter();
   //New Comment
   function disabledButton() {
     document.getElementById("submitButton").disabled = true;
@@ -33,8 +34,8 @@ export default function Example() {
       url: "/api/admin/company",
       data: data,
     });
-    enabledButton();
-    reset();
+
+    router.push("/admin?tab=companies");
   };
 
   return (
@@ -57,9 +58,6 @@ export default function Example() {
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="px-4 py-6 space-y-8 bg-white sm:p-6">
                   <div>
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">
-                      Perfil
-                    </h3>
                     {/* <p className="mt-1 text-sm text-gray-500">
                       Essa informação será visível para o usuário.
                     </p> */}

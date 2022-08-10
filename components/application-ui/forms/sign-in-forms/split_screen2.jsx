@@ -110,7 +110,7 @@ export function Screen2(context) {
                           type="email"
                           autoComplete="email"
                           required
-                          className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none sm:text-sm"
+                          className="block w-full px-3 py-2 placeholder-gray-400 transition duration-150 ease-in-out border border-gray-300 rounded-md shadow-sm appearance-none sm:text-sm outline-0 focus:border-0 focus:z-10"
                         />
                       </div>
                     </div>

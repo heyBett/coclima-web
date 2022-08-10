@@ -64,6 +64,7 @@ export default function Example() {
       },
     });
     enabledButton();
+    router.push("/admin?tab=users");
   };
 
   async function handleFile(event) {
@@ -92,9 +93,7 @@ export default function Example() {
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
-        <h1 className="text-4xl font-medium text-green-500">
-          Criar novo Usuário
-        </h1>
+        <h1 className="text-4xl font-medium text-green-500">Editar Usuário</h1>
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
           {/* Mostre que sua empresa está preocupada em construir um mundo melhor! */}
         </h2>
@@ -142,7 +141,7 @@ export default function Example() {
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Empresa
+                        Empresa/Parceiro
                       </label>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <select
@@ -237,7 +236,10 @@ export default function Example() {
                     <div className="col-span-4 ">
                       <div className="flex items-center mt-1">
                         <span className="inline-block w-24 h-24 overflow-hidden bg-gray-100 rounded-full">
-                          <img src={profileImage} />
+                          <img
+                            className="object-cover bg-black aspect-1"
+                            src={profileImage}
+                          />
                         </span>
                         <label className="px-3 py-2 ml-5 text-sm font-medium leading-4 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                           <input

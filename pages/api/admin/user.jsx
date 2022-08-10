@@ -6,22 +6,31 @@ export default async function handle(req, res) {
   const session = await unstable_getServerSession(req, res, authOptions);
   if (session.user.role === "Admin") {
     if (req.method === "POST") {
-      const user = await prisma.user.create({
-        data: {
-          name: req.body.name,
+      const exists = await prisma.user.findUnique({
+        where: {
           email: req.body.email,
-          password: req.body.password,
-          image: req.body.avatar.base64,
-          role: req.body.role,
-          company: {
-            connect: {
-              id: req.body.company,
-            },
-          },
         },
       });
-      res.json(user);
-      res.status(201);
+      if (exists) {
+        res.json("Exists");
+      } else {
+        const user = await prisma.user.create({
+          data: {
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            image: req.body.avatar.base64,
+            role: req.body.role,
+            company: {
+              connect: {
+                id: req.body.company,
+              },
+            },
+          },
+        });
+        res.json(user);
+        res.status(201);
+      }
     }
 
     if (req.method === "GET") {
@@ -48,24 +57,39 @@ export default async function handle(req, res) {
     }
 
     if (req.method === "PATCH") {
-      const user = await prisma.user.update({
-        where: {
-          id: req.body.id,
-        },
-        data: {
-          name: req.body.name,
-          email: req.body.email,
-          image: req.body.avatar.base64,
-          role: req.body.role,
-          company: {
-            connect: {
-              id: req.body.company,
+      if (session.user.role === "Admin") {
+        const user = await prisma.user.update({
+          where: {
+            id: req.body.id,
+          },
+          data: {
+            name: req.body.name,
+            email: req.body.email,
+            image: req.body.avatar.base64,
+            role: req.body.role,
+            company: {
+              connect: {
+                id: req.body.company,
+              },
             },
           },
-        },
-      });
-      res.json(user);
-      res.status(200);
+        });
+        res.json(user);
+        res.status(200);
+      } else {
+        const user = await prisma.user.update({
+          where: {
+            id: session.user.id,
+          },
+          data: {
+            name: req.body.name,
+            email: req.body.email,
+            image: req.body.avatar.base64,
+          },
+        });
+        res.json(user);
+        res.status(200);
+      }
     }
 
     if (req.method === "DELETE") {

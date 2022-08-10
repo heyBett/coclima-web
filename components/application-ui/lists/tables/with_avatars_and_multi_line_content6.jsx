@@ -10,9 +10,10 @@ export default function Example(props) {
 
   const ordenedReceipts = _.orderBy(receipts, ["id"], ["desc"]);
 
-  useEffect(() => {
-    console.log(receipts);
-  }, [receipts]);
+  const paidReceipts = ordenedReceipts.filter((item) => item.paid);
+  const paidReceiptsSum = (_.sumBy(paidReceipts, "value") / 100).toFixed(2);
+  const unpaidReceipts = ordenedReceipts.filter((item) => !item.paid);
+  const unpaidReceiptsSum = (_.sumBy(unpaidReceipts, "value") / 100).toFixed(2);
 
   const router = useRouter();
   const id = router.query.id;
@@ -29,6 +30,14 @@ export default function Example(props) {
     mutate("/api/admin/receipts/" + id);
   };
 
+  function classSelect(item) {
+    if (item) {
+      return "bg-green-500";
+    } else {
+      return "bg-red-500";
+    }
+  }
+
   return (
     <div className="">
       <div className="sm:flex sm:items-center"></div>
@@ -43,13 +52,13 @@ export default function Example(props) {
                       role="col"
                       className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                     >
-                      Order ID
+                      ID
                     </th>
                     <th
                       role="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Vendor
+                      Plataforma
                     </th>
                     <th
                       role="col"
@@ -61,68 +70,99 @@ export default function Example(props) {
                       role="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Controle
+                      Comissão
                     </th>
-
                     <th
                       role="col"
-                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                      className="text-center px-3 py-3.5  text-sm font-semibold text-gray-900"
                     >
-                      <span className="sr-only">Detalhes</span>
+                      Controle
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {ordenedReceipts?.map((receipt) => (
-                    <tr key={receipt.id}>
+                    <tr key={receipt.id} className={classSelect(receipt.paid)}>
                       <td className="py-4 pl-4 pr-3 text-sm whitespace-nowrap sm:pl-6">
                         <div className="flex items-center">
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-white">
                             {receipt.orderId !== null
                               ? receipt.orderId
                               : receipt.id}
                           </div>
                         </div>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        <div className="text-gray-500">{receipt.vendor}</div>
+                      <td className="px-3 py-4 text-sm whitespace-nowrap">
+                        <div className="text-white">{receipt.vendor}</div>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        <div className="text-gray-500">
+                      <td className="px-3 py-4 text-sm whitespace-nowrap">
+                        <div className="text-white">
                           R$ {(receipt.value / 100).toFixed(2)}
                         </div>
                       </td>
-                      <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
-                        <div className="text-gray-500">
-                          {receipt.paid ? (
+                      <td className="px-3 py-4 text-sm whitespace-nowrap">
+                        <div className="text-white">
+                          R${" "}
+                          {(
+                            (receipt.value / 10000) *
+                            parseInt(receipt.percentage, 10)
+                          ).toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-sm whitespace-nowrap">
+                        <div className="text-center text-white">
+                          {!receipt.paid ? (
                             <button
                               onClick={() => onChange(receipt)}
-                              className="px-3 py-1 text-white bg-red-600 rounded-md"
+                              className="w-24 px-3 py-2 text-red-600 bg-red-200 rounded-sm"
                             >
-                              Marcar como não pago
+                              Pendente
                             </button>
                           ) : (
                             <button
                               onClick={() => onChange(receipt)}
-                              className="px-3 py-1 text-white bg-green-600 rounded-md"
+                              className="w-24 px-3 py-2 text-green-600 bg-green-200 rounded-sm"
                             >
-                              Marcar como pago
+                              Pago
                             </button>
                           )}
                         </div>
-                      </td>
-
-                      <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                        <Link href={"/recursos/" + receipt.id}>
-                          <a className="text-green-600 hover:text-green-900">
-                            Detalhes
-                          </a>
-                        </Link>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="flex justify-center mt-2">
+              {unpaidReceiptsSum === "0.00" ? (
+                <div className="px-5 py-2 text-center text-white bg-green-700 rounded-l-lg">
+                  <h1>Pendente</h1>
+                  <p className="text-xs">Nenhuma pendência</p>
+                </div>
+              ) : (
+                <div className="px-5 py-2 text-center text-white bg-red-500 rounded-l-lg">
+                  <h1>Pendente</h1>
+                  <p className="text-xs">
+                    {"R$ " +
+                      (
+                        (unpaidReceiptsSum / 100) *
+                        parseInt(receipts[0]?.percentage, 10)
+                      ).toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              <div className="px-5 py-2 text-center text-white bg-green-600 rounded-r-lg">
+                <h1>Pagos</h1>
+                <p className="text-xs">
+                  {"R$ " +
+                    (
+                      (paidReceiptsSum / 100) *
+                      parseInt(receipts[0]?.percentage, 10)
+                    ).toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
         </div>

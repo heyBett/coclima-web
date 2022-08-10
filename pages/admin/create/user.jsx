@@ -10,15 +10,22 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import axios from "axios";
 import useSWR from "swr";
+import Notification from "../../../components/notification";
+import { useRouter } from "next/router";
 
 export default function Example() {
-  const [profileImage, setProfileImage] = useState("/images/default_users.jpg");
+  const [profileImage, setProfileImage] = useState("/images/default_user.jpg");
+  const [notification, setNotification] = useState(false);
 
   const { register, handleSubmit, reset } = useForm();
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin/`, fetcher);
+  const router = useRouter();
 
+  const companies = data?.companies;
+  const partners = data?.partners;
+  const companiesAndPartners = companies?.concat(partners);
   //New Comment
   function disabledButton() {
     document.getElementById("submitButton").disabled = true;
@@ -34,26 +41,32 @@ export default function Example() {
 
   const onSubmit = async (data) => {
     disabledButton();
+    console.log(data);
     const response = await axios({
       method: "POST",
       url: "/api/admin/user",
       data: {
         name: data.name,
         email: data.email,
-        password: data.password,
         role: data.role,
         company: data.company,
         avatar: {
           base64: profileImage,
-          filename: data.avatar[0].name,
-          contentType: data.avatar[0].type,
-          size: data.avatar[0].size,
+          filename: data.avatar[0]?.name,
+          contentType: data.avatar[0]?.type,
+          size: data.avatar[0]?.size,
         },
       },
     });
-    enabledButton();
-    reset();
-    /* resetForm(); */
+    if (response.data !== "Exists") {
+      router.push("/admin/?tab=users");
+    } else {
+      enabledButton();
+      setNotification(true);
+      setTimeout(function () {
+        setNotification(false);
+      }, 3000);
+    }
   };
 
   async function handleFile(event) {
@@ -80,7 +93,11 @@ export default function Example() {
       <Head>
         <title>Create Next App</title>
       </Head>
-
+      <Notification
+        type={false}
+        title={"Esse usuário já existe"}
+        notification={notification}
+      ></Notification>
       <main className="m-6 sm:mx-10 sm:mt-10">
         <h1 className="text-4xl font-medium text-green-500">
           Criar novo Usuário
@@ -130,16 +147,16 @@ export default function Example() {
                     </div>
                     <div className="col-span-2">
                       <label className="block text-sm font-medium text-gray-700">
-                        Empresa
+                        Empresa/Partner
                       </label>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <select
-                          {...register("company")}
+                          {...register("company", { required: true })}
                           name="company"
                           id="company"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         >
-                          {data?.companies.map((company) => (
+                          {companiesAndPartners?.map((company) => (
                             <option key={company.id} value={company.id}>
                               {company.name}
                             </option>
@@ -192,7 +209,7 @@ export default function Example() {
                         />
                       </div>
                     </div>
-                    <div className="col-span-4 sm:col-span-2 xl:col-span-1">
+                    {/* <div className="col-span-4 sm:col-span-2 xl:col-span-1">
                       <div className="flex flex-row justify-between">
                         <label
                           htmlFor="company-website"
@@ -215,7 +232,7 @@ export default function Example() {
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         />
                       </div>
-                    </div>
+                    </div> */}
                     <div className="col-span-4 ">
                       <div className="flex items-center mt-1">
                         <span className="inline-block w-24 h-24 overflow-hidden bg-gray-100 rounded-full">

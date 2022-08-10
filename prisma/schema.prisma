@@ -112,7 +112,7 @@ model User {
   id               String     @id @unique @default(cuid())
   name             String?
   password         String?
-  image            String?    @default("/images/default_users.jpg")
+  image            String?    @default("/images/default_user.jpg")
   email            String     @unique
   emailVerified    DateTime?
   role             String     @default("User")

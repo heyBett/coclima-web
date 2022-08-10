@@ -20,6 +20,11 @@ export default async function handle(req, res) {
           date: true,
           order_id: true,
           vendor: true,
+          company: {
+            select: {
+              percentage: true,
+            },
+          },
           company_id: true,
           created_at: true,
         },
@@ -44,6 +49,7 @@ export default async function handle(req, res) {
         value: item.value,
         id: item.id,
         paid: item.paid,
+        percentage: item.company.percentage,
         orderId: item.order_id,
         vendor: item.vendor,
         dateStr: month[item.date.getMonth()] + "/" + item.date.getFullYear(),

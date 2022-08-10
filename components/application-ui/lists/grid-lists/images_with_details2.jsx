@@ -20,6 +20,20 @@ export default function Example() {
     return <Loader></Loader>;
   }
 
+  if (plantations.length === 0) {
+    return (
+      <div className="">
+        <h1 className="text-xl text-gray-600">
+          Você <span className="font-semibold text-green-500">ainda</span> não
+          tem nenhuma àrvore plantada
+        </h1>
+        <p className="pt-1 text-gray-600">
+          Em breve as fotografias de suas plantações estarão disponíveis aqui!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <ul
       role="list"

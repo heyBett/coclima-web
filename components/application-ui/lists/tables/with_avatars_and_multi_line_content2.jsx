@@ -94,7 +94,7 @@ export default function Example(props) {
                         </div>
                       </td>
                       <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                        <Link href={"editar/company/" + company.id}>
+                        <Link href={"admin/edit/company/" + company.id}>
                           <a className="text-green-600 hover:text-green-900">
                             Editar
                             <span className="sr-only">, {company.name}</span>

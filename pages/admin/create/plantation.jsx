@@ -1,17 +1,12 @@
-import {
-  CreditCardIcon,
-  KeyIcon,
-  UserCircleIcon,
-  UserGroupIcon,
-  ViewGridAddIcon,
-  XIcon,
-} from "@heroicons/react/outline";
+import { XIcon } from "@heroicons/react/outline";
 import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import useSWR from "swr";
 import Select from "react-select";
+import Router from "next/router";
+import { useRouter } from "next/router";
 
 export default function Example() {
   const [photos, setPhotos] = useState([]);
@@ -33,7 +28,7 @@ export default function Example() {
   ];
 
   const { register, handleSubmit, reset, getValues, setValue } = useForm();
-
+  const router = useRouter();
   useEffect(() => {
     if (getValues("partner") === "" || getValues("partner") === undefined) {
       setValue("partner", data?.partners[0].id);
@@ -57,20 +52,20 @@ export default function Example() {
         "companyData[" + index + "].avaibleValue",
 
         "R$ " +
-          ((
-            company.receipts
+          (
+            (company.receipts
               .map((item) => item)
               .map((item) => item.value)
-              .reduce((a, b) => a + b, 0) / 100
-          ).toFixed(2) -
-            (
-              company.handler
-                .map((item) => item)
-                .map((item) => item.value)
-                .reduce((a, b) => a + b, 0) / 100
-            ).toFixed(2) -
+              .reduce((a, b) => a + b, 0) /
+              10000) *
+              parseInt(company.percentage, 10) -
+            company.handler
+              .map((item) => item)
+              .map((item) => item.value)
+              .reduce((a, b) => a + b, 0) -
             parseInt(getValues("companyData[" + index + "].treeQuantity"), 10) *
-              parseInt(cost, 10))
+              parseInt(cost, 10)
+          ).toFixed(2)
       );
     });
   }, [cost]);
@@ -122,20 +117,16 @@ export default function Example() {
         },
       });
     }
-    enabledButton();
+    /* enabledButton();
     setPhotos([]);
     setSelectedCompanies([]);
     setCost("25");
-    reset();
+    reset(); */
+    router.push("/admin?tab=plantations");
   };
-
-  useEffect(() => {
-    console.log(photos);
-  }, [photos]);
 
   async function handleFile(event) {
     [...event.target.files].map(async (file) => {
-      console.log(file);
       const base64 = await convertBase64(file);
       const photo = {
         data: base64,
@@ -506,20 +497,23 @@ export default function Example() {
                                     "companyData[" + index + "].avaibleValue",
 
                                     "R$ " +
-                                      ((
-                                        company.receipts
-                                          .map((item) => item)
-                                          .map((item) => item.value)
-                                          .reduce((a, b) => a + b, 0) / 100
-                                      ).toFixed(2) -
+                                      (
                                         (
-                                          company.handler
+                                          (company.receipts
                                             .map((item) => item)
                                             .map((item) => item.value)
-                                            .reduce((a, b) => a + b, 0) / 100
+                                            .reduce((a, b) => a + b, 0) /
+                                            10000) *
+                                          parseInt(company.percentage, 10)
                                         ).toFixed(2) -
+                                        company.handler
+                                          .map((item) => item)
+                                          .map((item) => item.value)
+                                          .reduce((a, b) => a + b, 0)
+                                          .toFixed(2) -
                                         parseInt(e.target.value, 10) *
-                                          parseInt(cost, 10))
+                                          parseInt(cost, 10)
+                                      ).toFixed(2)
                                   );
                                 }}
                                 name={"companyData[" + index + "].treeQuantity"}

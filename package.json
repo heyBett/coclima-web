@@ -27,6 +27,7 @@
     "react-awesome-reveal": "^3.8.1",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.34.0",
+    "react-imask": "^6.4.2",
     "react-select": "^5.4.0",
     "recharts": "^2.1.12",
     "sass": "^1.54.3",

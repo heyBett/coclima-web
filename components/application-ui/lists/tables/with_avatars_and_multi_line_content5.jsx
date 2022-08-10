@@ -17,7 +17,7 @@ export default function Example(props) {
           </h2>
         </div>
         <div className="">
-          <Link href="/admin/create/company">
+          <Link href="/admin/create/receipt">
             <a className="px-4 py-3 my-6 text-white bg-green-500 rounded-md hover:bg-green-700">
               Criar Recibo
             </a>

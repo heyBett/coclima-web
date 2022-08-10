@@ -29,9 +29,24 @@ export default async function handle(req, res) {
     }
 
     if (req.method === "GET") {
+      const company = await prisma.companies.findUnique({
+        where: {
+          id: req.query.id,
+        },
+      });
+      res.json(company);
+      res.status(201);
     }
 
     if (req.method === "PATCH") {
+      const company = await prisma.companies.update({
+        where: {
+          id: req.query.id,
+        },
+        data: req.body.data,
+      });
+      res.json(company);
+      res.status(200);
     }
 
     if (req.method === "DELETE") {

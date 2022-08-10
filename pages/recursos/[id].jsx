@@ -31,6 +31,8 @@ export default function Home(props) {
     }
   }, [data]);
 
+  const receipts = data;
+
   function uniqBy(a, key) {
     var seen = {};
     return a?.filter(function (item) {

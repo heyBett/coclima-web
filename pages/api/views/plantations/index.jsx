@@ -36,13 +36,15 @@ export default async function handle(req, res) {
       },
     });
 
+    const handlerMap = result.handler.map((item) => item.id);
+
     const photos = await prisma.archives.findMany({
       take: 9,
       where: {
         plantation: {
           handler: {
             some: {
-              id: result.handler.id,
+              company_id: session.user.company_id,
             },
           },
         },

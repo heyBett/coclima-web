@@ -22,7 +22,7 @@ import { SearchIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
-const userNavigation = [{ name: "Editar Perfil", href: "#" }];
+const userNavigation = [{ name: "Editar Perfil", href: "/perfil" }];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -95,36 +95,70 @@ export default function Sidebar(props) {
               </Link>
             </div>
             <div className="flex-1 w-full pr-2 mt-6 space-y-1">
-              {sidebarNavigation.map((item) => (
-                <Link href={item.href} key={item.name}>
-                  <a
-                    onClick={() => CurrentNav(item.href)}
-                    href={item.href}
-                    className={classNames(
-                      item.current
-                        ? "bg-green-100 text-green-500 font-bold"
-                        : "text-green-500 hover:bg-green-500 hover:text-white font-regular",
-                      "group w-full p-3 rounded-r-md flex items-center text-sm"
-                    )}
-                    aria-current={item.current ? "page" : undefined}
-                  >
-                    {item.current ? (
-                      <item.icon
-                        className="w-5 h-5 fill-green-500"
-                        aria-hidden="true"
-                        filled
-                      />
-                    ) : (
-                      <item.icon
-                        className="w-5 h-5 fill-green-500 group-hover:fill-white"
-                        aria-hidden="true"
-                      />
-                    )}
+              {session.user.role === "Admin"
+                ? sidebarNavigation.map((item) => (
+                    <Link href={item.href} key={item.name}>
+                      <a
+                        onClick={() => CurrentNav(item.href)}
+                        href={item.href}
+                        className={classNames(
+                          item.current
+                            ? "bg-green-100 text-green-500 font-bold"
+                            : "text-green-500 hover:bg-green-500 hover:text-white font-regular",
+                          "group w-full p-3 rounded-r-md flex items-center text-sm"
+                        )}
+                        aria-current={item.current ? "page" : undefined}
+                      >
+                        {item.current ? (
+                          <item.icon
+                            className="w-5 h-5 fill-green-500"
+                            aria-hidden="true"
+                            filled
+                          />
+                        ) : (
+                          <item.icon
+                            className="w-5 h-5 fill-green-500 group-hover:fill-white"
+                            aria-hidden="true"
+                          />
+                        )}
 
-                    <span className="ml-3">{item.name}</span>
-                  </a>
-                </Link>
-              ))}
+                        <span className="ml-3">{item.name}</span>
+                      </a>
+                    </Link>
+                  ))
+                : sidebarNavigation.map(
+                    (item) =>
+                      !item.admin && (
+                        <Link href={item.href} key={item.name}>
+                          <a
+                            onClick={() => CurrentNav(item.href)}
+                            href={item.href}
+                            className={classNames(
+                              item.current
+                                ? "bg-green-100 text-green-500 font-bold"
+                                : "text-green-500 hover:bg-green-500 hover:text-white font-regular",
+                              "group w-full p-3 rounded-r-md flex items-center text-sm"
+                            )}
+                            aria-current={item.current ? "page" : undefined}
+                          >
+                            {item.current ? (
+                              <item.icon
+                                className="w-5 h-5 fill-green-500"
+                                aria-hidden="true"
+                                filled
+                              />
+                            ) : (
+                              <item.icon
+                                className="w-5 h-5 fill-green-500 group-hover:fill-white"
+                                aria-hidden="true"
+                              />
+                            )}
+
+                            <span className="ml-3">{item.name}</span>
+                          </a>
+                        </Link>
+                      )
+                  )}
 
               <a
                 className="cursor-pointer flex items-center w-full p-3 !mt-10 pt-10 text-sm text-gray-500 border-t border-gray-200 rounded-md hover:text-red-500 hover:font-bold font-regular group"
@@ -151,9 +185,11 @@ export default function Sidebar(props) {
                     <p className="overflow-hidden text-sm font-medium text-gray-700 w-28 group-hover:text-gray-900 text-ellipsis whitespace-nowrap">
                       {session?.user.name}
                     </p>
-                    <p className="text-xs font-medium text-green-500 group-hover:text-gray-700">
-                      Editar Perfil
-                    </p>
+                    <Link href="/perfil">
+                      <a className="text-xs font-medium text-green-500 group-hover:text-gray-700">
+                        Editar Perfil
+                      </a>
+                    </Link>
                   </div>
                 </div>
               </a>

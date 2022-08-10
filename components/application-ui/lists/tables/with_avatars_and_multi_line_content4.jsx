@@ -4,12 +4,12 @@ export default function Example(props) {
   const plantations = props.plantations;
 
   const total =
-    plantations[0].handler
+    plantations[0]?.handler
       .map((item) => item.value)
-      .reduce((a, b) => a + b, 0) / plantations[0].tree_value;
+      .reduce((a, b) => a + b, 0) / plantations[0]?.tree_value;
 
   const investido =
-    plantations[0].handler
+    plantations[0]?.handler
       .map((item) => item.value)
       .reduce((a, b) => a + b, 0)
       .toFixed(2) / 100;
@@ -109,7 +109,7 @@ export default function Example(props) {
                       </td>
 
                       <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                        <Link href={"editar/plantation/" + plantation.id}>
+                        <Link href={"admin/edit/plantation/" + plantation.id}>
                           <a className="text-green-600 hover:text-green-900">
                             Editar
                             <span className="sr-only">, {plantation.name}</span>

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from "../../components/application-ui/headings/page-headings/with_actions_and_breadcrumbs_on_dark";
 import Hello from "../../components/application-ui/data-display/stats/with_brand_icon";
@@ -10,6 +10,7 @@ import Plantations from "../../components/application-ui/lists/tables/with_avata
 import Options from "../../components/application-ui/navigation/tabs/bar_with_underline";
 import useSWR from "swr";
 import Loader from "../../components/loader";
+import { useRouter } from "next/router";
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -23,6 +24,26 @@ export default function Home() {
     { name: "Plantios", scope: "plantations", current: false },
   ]);
 
+  const router = useRouter();
+  const tab = router.query.tab;
+  useEffect(() => {
+    function CurrentNav(scope) {
+      setCurrent(scope);
+      tabs.forEach((item) => {
+        item.current = item.scope === scope;
+      });
+      setTabs(tabs);
+    }
+    if (
+      tab === "users" ||
+      tab === "companies" ||
+      tab === "partners" ||
+      tab === "plantations"
+    ) {
+      CurrentNav(tab);
+    }
+  }, [tab]);
+
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin`, fetcher);
 
@@ -33,14 +54,6 @@ export default function Home() {
 
   if (!data) {
     return <Loader></Loader>;
-  }
-
-  function CurrentNav(scope) {
-    setCurrent(scope);
-    tabs.forEach((item) => {
-      item.current = item.scope === scope;
-    });
-    setTabs(tabs);
   }
 
   return (
@@ -63,7 +76,7 @@ export default function Home() {
             <label htmlFor="tabs" className="sr-only">
               Select a tab
             </label>
-            {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
+
             <select
               id="tabs"
               name="tabs"
@@ -82,7 +95,7 @@ export default function Home() {
             >
               {tabs.map((tab, tabIdx) => (
                 <a
-                  onClick={() => CurrentNav(tab.scope)}
+                  onClick={() => router.push(`/admin?tab=${tab.scope}`)}
                   key={tab.name}
                   href={tab.href}
                   className={classNames(

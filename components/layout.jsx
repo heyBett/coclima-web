@@ -5,12 +5,15 @@ import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { Screen2 } from "../components/application-ui/forms/sign-in-forms/split_screen2";
 import Loader from "./loader";
+import { useRouter } from "next/router";
 
 export function Layout({ children }) {
   const [loading, setLoading] = useState(true);
   const [login, setLogin] = useState(false);
-  const [noName, setNoName] = useState(false);
+  const [firstLogin, setFirstLogin] = useState(false);
+  const [onboarding, setOnboarding] = useState(false);
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     if (status === "loading") {
@@ -25,7 +28,7 @@ export function Layout({ children }) {
   useEffect(() => {
     if (status === "authenticated" && session.user.name !== null) {
       setLogin(false);
-      setNoName(false);
+
       setLoading(false);
     }
 
@@ -33,8 +36,18 @@ export function Layout({ children }) {
       setLogin(true);
     }
 
-    if (status === "authenticated" && session.user.name === null) {
-      setNoName(true);
+    if (
+      (status === "authenticated" && session?.user.name === null) ||
+      (status === "authenticated" && session?.user.company_id === null)
+    ) {
+      setFirstLogin(true);
+    }
+    if (
+      status === "authenticated" &&
+      session?.user.name !== null &&
+      session?.user.company_id !== null
+    ) {
+      setFirstLogin(false);
     }
   }, [status, session]);
 
@@ -47,6 +60,14 @@ export function Layout({ children }) {
         <Screen2></Screen2>
       </div>
     );
+  }
+
+  if (firstLogin && router.pathname !== "/perfil" && !onboarding) {
+    router.push("/perfil");
+    setOnboarding(true);
+    setTimeout(function () {
+      setOnboarding(false);
+    }, 2000);
   }
 
   if (loading) {
