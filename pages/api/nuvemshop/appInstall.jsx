@@ -87,7 +87,7 @@ export default async function handler(req, res) {
 
   const existingCompany = await prisma.companies.findFirst({
     where: {
-      nsid: store_id,
+      nsid: '"' + store_id + '"',
     },
   });
 
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
         street: street,
         phone: phone,
         role: "company",
-        nsid: store_id,
+        nsid: '"' + store_id + '"',
         nstoken: access_token,
         cpfcnpj: cpfcnpj,
         email: email,
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
         id: existingCompany.id,
       },
       data: {
-        nsid: store_id,
+        nsid: '"' + store_id + '"',
         nstoken: access_token,
         email: email,
       },
