@@ -4,7 +4,7 @@ export default function Upload() {
       <form
         action="http://localhost:80/api/fileUpload/upload"
         method="post"
-        enctype="multipart/form-data"
+        encType="multipart/form-data"
       >
         <input type="file" name="fileupload"></input>
 
