@@ -6,66 +6,77 @@ export default function handler(req, res) {
   const header = req.headers["x-linkedstore-hmac-sha256"];
   const secret = "Bh6XbGgPd1GoW18rCj95m3ePSErdrAB8zv5OuFeVJEI6gt6R";
   const data = req.body;
-  console.log(data);
-  console.log(header);
   const validated = crypto
     .createHmac("sha256", secret)
     .update(JSON.stringify(data))
     .digest("hex");
 
-  console.log(validated, header);
+  const authenticatedWebhook = validated === header;
 
-  /* function verify_webhook(secret, header) {
-    return header == hash_hmac("sha256", $data, APP_SECRET);
-  }
+  console.log("Came from Nuvemshop: " + authenticatedWebhook);
 
-  const validated = verify_webhook("", validation); */
+  if (authenticatedWebhook) {
+    //Get data from Coclima about this store access token
+    const company = /* await */ prisma.companies.findFirst({
+      where: {
+        nsid: '"' + req.body.store_id + '"',
+      },
+    });
+    const access_token = company.access_token;
 
-  //Get data from Coclima about this store access token
-  const company = /* await */ prisma.companies.findFirst({
-    where: {
-      nsid: '"' + req.body.store_id + '"',
-    },
-  });
-  const access_token = company.access_token;
+    //Get data from Order
+    const optionsStore = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "CoClima(https://coclima.com)",
+        Agent: "Luiz Bett(luiz@codx.dev",
+        Authentication: "bearer " + access_token,
+      },
+    };
+    const urlStore =
+      "https://api.tiendanube.com/v1/" +
+      req.body.store_id +
+      "/orders/" +
+      req.body.id;
+    const requestStore = /*  await */ fetch(urlStore, optionsStore);
+    const responseStore = /* await */ requestStore.json();
+    const date = responseStore.created_at;
+    const subtotal = responseStore.subtotal;
+    console.log(responseStore);
 
-  //Get data from Order
-  const optionsStore = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "CoClima(https://coclima.com)",
-      Agent: "Luiz Bett(luiz@codx.dev",
-      Authentication: "bearer " + access_token,
-    },
-  };
-  const urlStore =
-    "https://api.tiendanube.com/v1/" +
-    req.body.store_id +
-    "/orders/" +
-    req.body.id;
-  const requestStore = /*  await */ fetch(urlStore, optionsStore);
-  const responseStore = /* await */ requestStore.json();
-  const date = responseStore.created_at;
-  const subtotal = responseStore.subtotal;
-  console.log(responseStore);
-
-  //Post Receipt with order information
-  const receipt = /* await  */ prisma.receipts.create({
-    data: {
-      date: date,
-      vendor: "nuvemshop",
-      value: subtotal,
-      order_id: req.body.id,
-      company: {
-        connect: {
-          id: company.id,
+    //Post Receipt with order information
+    const receipt = /* await  */ prisma.receipts.create({
+      data: {
+        date: date,
+        vendor: "nuvemshop",
+        value: subtotal,
+        order_id: req.body.id,
+        company: {
+          connect: {
+            id: company.id,
+          },
         },
       },
-    },
-  });
+    });
 
-  console.log(receipt);
+    console.log(receipt);
 
-  return res.status(200).json({});
+    const log = prisma.log.create({
+      data: {
+        receipt: {
+          connect: {
+            id: receipt.id,
+          },
+        },
+        value: receipt.value,
+        description: "Criado pela API da Nuvemshop",
+        event: "Criado",
+        status: false,
+      },
+    });
+
+    return res.status(200).json({});
+  }
+  return res.status(403).json("Not authorized");
 }

@@ -1,7 +1,5 @@
 import fetch from "node-fetch";
 import { prisma } from "../../../db";
-import { authOptions } from "../auth/[...nextauth]";
-import { unstable_getServerSession } from "next-auth/next";
 
 export default async function handler(req, res) {
   const code = req.query.code;
@@ -89,7 +87,7 @@ export default async function handler(req, res) {
 
   const existingCompany = await prisma.companies.findFirst({
     where: {
-      nsid: '"' + store_id + '"',
+      nsid: store_id,
     },
   });
 
@@ -102,7 +100,7 @@ export default async function handler(req, res) {
         street: street,
         phone: phone,
         role: "company",
-        nsid: '"' + store_id + '"',
+        nsid: store_id,
         nstoken: access_token,
         cpfcnpj: cpfcnpj,
         email: email,
@@ -115,13 +113,8 @@ export default async function handler(req, res) {
         id: existingCompany.id,
       },
       data: {
-        name: name,
-        street: street,
-        phone: phone,
-        role: "company",
-        nsid: '"' + store_id + '"',
+        nsid: store_id,
         nstoken: access_token,
-        cpfcnpj: cpfcnpj,
         email: email,
       },
     });
@@ -144,7 +137,11 @@ export default async function handler(req, res) {
         name: name,
         role: "user",
         email: email,
-        company_id: company.id,
+        company: {
+          connect: {
+            id: company.id,
+          },
+        },
       },
     });
   }
@@ -161,7 +158,7 @@ export default async function handler(req, res) {
       Authentication: "bearer " + access_token,
     },
     body: JSON.stringify({
-      url: "https://co-clima-dashboard-v2.vercel.app/api/nuvemshop/orderUpdate",
+      url: "https://parceiros.coclima.com/api/nuvemshop/orderUpdate",
       event: "order/paid",
     }),
   };
@@ -183,7 +180,7 @@ export default async function handler(req, res) {
       Authentication: "bearer " + access_token,
     },
     body: JSON.stringify({
-      url: "https://co-clima-dashboard-v2.vercel.app/api/nuvemshop/orderUpdate",
+      url: "https://parceiros.coclima.com/api/nuvemshop/orderUpdate",
       event: "order/cancelled",
     }),
   };
@@ -208,7 +205,7 @@ export default async function handler(req, res) {
       Authentication: "bearer " + access_token,
     },
     body: JSON.stringify({
-      src: "https://parceiros.coclima.com//api/nuvemshop/storeModal",
+      src: "https://parceiros.coclima.com/api/nuvemshop/storeModal",
       event: "onload",
       where: "checkout",
     }),

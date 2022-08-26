@@ -10,23 +10,27 @@ import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import useSWR from "swr";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import Loader from "./loader";
 
 export default function Example(props) {
   const [profileImage, setProfileImage] = useState("/images/default_user.jpg");
+  const [cpfCnpj, setCpfCnpj] = useState("CNPJ");
+  const { data: session, status } = useSession();
+  const user = session?.user;
 
   const { register, handleSubmit, reset, getValues, setValue } = useForm();
   const router = useRouter();
 
-  const session = props.session;
-  const firstLogin = session.user.company_id === null;
+  const firstLogin = session?.user.company_id === null;
   const noCNPJ =
-    session.user.company_cnpj === null ||
+    session?.user.company_cnpj === null ||
     session?.user.company_cnpj.includes("Sem CNPJ");
 
   useEffect(() => {
-    setProfileImage(session.user.image);
-  }, []);
+    setProfileImage(session?.user.image);
+  }, [session]);
 
   //New Comment
   function disabledButton() {
@@ -41,31 +45,142 @@ export default function Example(props) {
     document.getElementById("submitButton").classList.remove("!bg-green-800");
   }
 
-  const onSubmit = async (data) => {
-    data.avatar.base64 = profileImage;
-    console.log(data);
-    disabledButton();
-    if (firstLogin) {
-      const response = await axios({
-        method: "POST",
-        url: "/api/firstLogin",
-        data,
-      });
+  function verifica_cpf_cnpj(valor) {
+    valor = valor.toString();
+    valor = valor.replace(/[^0-9]/g, "");
+    if (valor.length === 11) {
+      return "CPF";
+    } else if (valor.length === 14) {
+      return "CNPJ";
     } else {
-      const response = await axios({
-        method: "PATCH",
-        url: "/api/admin/user",
-        data: {
-          name: data.name,
-          email: data.email,
-          avatar: {
-            base64: profileImage,
-          },
-        },
-      });
+      return false;
     }
-    enabledButton();
-    window.location.replace("/");
+  }
+  function calc_digitos_posicoes(digitos, posicoes = 10, soma_digitos = 0) {
+    digitos = digitos.toString();
+    for (var i = 0; i < digitos.length; i++) {
+      soma_digitos = soma_digitos + digitos[i] * posicoes;
+      posicoes--;
+      if (posicoes < 2) {
+        posicoes = 9;
+      }
+    }
+    soma_digitos = soma_digitos % 11;
+    if (soma_digitos < 2) {
+      soma_digitos = 0;
+    } else {
+      soma_digitos = 11 - soma_digitos;
+    }
+    var cpf = digitos + soma_digitos;
+    return cpf;
+  }
+
+  function valida_cpf(valor) {
+    valor = valor.toString();
+    valor = valor.replace(/[^0-9]/g, "");
+    var digitos = valor.substr(0, 9);
+    var novo_cpf = calc_digitos_posicoes(digitos);
+    var novo_cpf = calc_digitos_posicoes(novo_cpf, 11);
+    if (novo_cpf === valor) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function valida_cnpj(valor) {
+    valor = valor.toString();
+    valor = valor.replace(/[^0-9]/g, "");
+    var cnpj_original = valor;
+    var primeiros_numeros_cnpj = valor.substr(0, 12);
+    var primeiro_calculo = calc_digitos_posicoes(primeiros_numeros_cnpj, 5);
+    var segundo_calculo = calc_digitos_posicoes(primeiro_calculo, 6);
+    var cnpj = segundo_calculo;
+    if (cnpj === cnpj_original) {
+      return true;
+    }
+    return false;
+  }
+
+  function valida_cpf_cnpj(valor) {
+    var valida = verifica_cpf_cnpj(valor);
+    valor = valor.toString();
+    valor = valor.replace(/[^0-9]/g, "");
+    if (valida === "CPF") {
+      return valida_cpf(valor);
+    } else if (valida === "CNPJ") {
+      return valida_cnpj(valor);
+    } else {
+      return false;
+    }
+  }
+
+  function formata_cpf_cnpj(valor) {
+    var formatado = false;
+    var valida = verifica_cpf_cnpj(valor);
+    valor = valor.toString();
+    valor = valor.replace(/[^0-9]/g, "");
+    if (valida === "CPF") {
+      if (valida_cpf(valor)) {
+        formatado = valor.substr(0, 3) + ".";
+        formatado += valor.substr(3, 3) + ".";
+        formatado += valor.substr(6, 3) + "-";
+        formatado += valor.substr(9, 2) + "";
+      }
+    } else if (valida === "CNPJ") {
+      if (valida_cnpj(valor)) {
+        formatado = valor.substr(0, 2) + ".";
+        formatado += valor.substr(2, 3) + ".";
+        formatado += valor.substr(5, 3) + "/";
+        formatado += valor.substr(8, 4) + "-";
+        formatado += valor.substr(12, 14) + "";
+      }
+    }
+    return formatado;
+  }
+
+  function CPFCNPJMask(v) {
+    if (v.replace(/[^\d]/g, "").length < 12) {
+      v = v.replace(/\D/g, "");
+      v = v.replace(/^(\d{3})(\d)/g, "$1.$2");
+      v = v.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
+      v = v.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+      v = v.replace(/^(\d{3})\.(\d{3})\.(\d{3})\/(\d{2})(\d)/, "$1.$2.$3-$4");
+      return v.substring(0, 14);
+    } else {
+      v = v.replace(/\D/g, "");
+      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d)/, "$1.$2.$3/$4-$5");
+      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      return v.substring(0, 18);
+    }
+  }
+
+  const onSubmit = async (data) => {
+    if (valida_cpf_cnpj(data.cpfcnpj)) {
+      data.cpfcnpj = data.cpfcnpj.replace(/[^\d]/g, "");
+      data.avatar.base64 = profileImage;
+      console.log(data);
+      disabledButton();
+      if (firstLogin) {
+        const response = await axios({
+          method: "POST",
+          url: "/api/firstLogin",
+          data,
+        });
+      }
+      if (noCNPJ && !firstLogin) {
+        const response = await axios({
+          method: "POST",
+          url: "/api/cnpjUpdate",
+          data,
+        });
+      }
+
+      enabledButton();
+      window.location.replace("/");
+    } else {
+      alert("CNPJ/CPF inválido");
+    }
   };
 
   async function handleFile(event) {
@@ -87,6 +202,10 @@ export default function Example(props) {
     });
   }
 
+  if (!session) {
+    return <Loader></Loader>;
+  }
+
   return (
     <div>
       <Head>
@@ -94,11 +213,16 @@ export default function Example(props) {
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
-        {firstLogin ? (
+        {firstLogin && !noCNPJ && (
           <h1 className="text-4xl font-medium text-green-500">Criar Perfil</h1>
-        ) : (
-          <h1 className="text-4xl font-medium text-green-500">Editar Perfil</h1>
         )}
+
+        {!firstLogin && noCNPJ && (
+          <h1 className="text-4xl font-medium text-green-500">
+            Completar Perfil
+          </h1>
+        )}
+
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
           {/* Mostre que sua empresa está preocupada em construir um mundo melhor! */}
         </h2>
@@ -141,7 +265,7 @@ export default function Example(props) {
                         <input
                           required
                           {...register("name", {
-                            value: session.user.name,
+                            value: session?.user.name,
                           })}
                           type="text"
                           name="name"
@@ -168,7 +292,7 @@ export default function Example(props) {
                         <input
                           required
                           {...register("email", {
-                            value: session.user.email,
+                            value: session?.user.email,
                           })}
                           type="email"
                           name="email"
@@ -519,6 +643,10 @@ export default function Example(props) {
                           <input
                             required
                             {...register("cpfcnpj")}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              event.target.value = CPFCNPJMask(value);
+                            }}
                             type="text"
                             name="cpfcnpj"
                             id="cpfcnpj"

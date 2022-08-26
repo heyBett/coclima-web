@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Screen2 } from "../components/application-ui/forms/sign-in-forms/split_screen2";
 import Loader from "./loader";
 import { useRouter } from "next/router";
+import Perfil from "../components/perfil";
 
 export function Layout({ children }) {
   const [loading, setLoading] = useState(true);
@@ -38,14 +39,19 @@ export function Layout({ children }) {
 
     if (
       (status === "authenticated" && session?.user.name === null) ||
-      (status === "authenticated" && session?.user.company_id === null)
+      (status === "authenticated" && session?.user.company_id === null) ||
+      (status === "authenticated" && session?.user.company_cnpj === null) ||
+      (status === "authenticated" &&
+        session?.user.company_cnpj.includes("Sem CNPJ"))
     ) {
       setFirstLogin(true);
     }
     if (
       status === "authenticated" &&
       session?.user.name !== null &&
-      session?.user.company_id !== null
+      session?.user.company_id !== null &&
+      session?.user.company_cnpj !== null &&
+      !session?.user.company_cnpj.includes("Sem CNPJ")
     ) {
       setFirstLogin(false);
     }
@@ -62,12 +68,8 @@ export function Layout({ children }) {
     );
   }
 
-  if (firstLogin && router.pathname !== "/perfil" && !onboarding) {
-    router.push("/perfil");
-    setOnboarding(true);
-    setTimeout(function () {
-      setOnboarding(false);
-    }, 2000);
+  if (firstLogin) {
+    return <Perfil></Perfil>;
   }
 
   if (loading) {

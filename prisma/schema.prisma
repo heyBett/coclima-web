@@ -152,6 +152,8 @@ model Logs {
   id          String   @id @unique @default(cuid())
   receipt     receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   receiptId   String
+  value       String
+  status      String
   event       String
   description String?
   created_at  DateTime @default(now())
