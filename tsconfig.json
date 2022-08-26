@@ -23,7 +23,8 @@
     "**/*.tsx",
     "**/*.jsx",
     "pages/index.jsx",
-    "pages/api/nuvemshop/storeModal.js"
+    "public/storeModal.js",
+    "pages/api/nuvemshop/storeModal.jsx"
   ],
   "exclude": ["node_modules"]
 }
