@@ -2,8 +2,25 @@ import fetch from "node-fetch";
 import { prisma } from "../../../db";
 
 export default function handler(req, res) {
-  const header = req;
+  const crypto = require("crypto");
+  const header = req.headers["x-linkedstore-hmac-sha256"];
+  const secret = "Bh6XbGgPd1GoW18rCj95m3ePSErdrAB8zv5OuFeVJEI6gt6R";
+  const data = req.body;
+  console.log(data);
   console.log(header);
+  const validated = crypto
+    .createHmac("sha256", secret)
+    .update(JSON.stringify(data))
+    .digest("hex");
+
+  console.log(validated, header);
+
+  /* function verify_webhook(secret, header) {
+    return header == hash_hmac("sha256", $data, APP_SECRET);
+  }
+
+  const validated = verify_webhook("", validation); */
+
   //Get data from Coclima about this store access token
   const company = /* await */ prisma.companies.findFirst({
     where: {
@@ -11,7 +28,6 @@ export default function handler(req, res) {
     },
   });
   const access_token = company.access_token;
-  console.log(company);
 
   //Get data from Order
   const optionsStore = {
