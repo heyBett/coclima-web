@@ -2,6 +2,8 @@ import fetch from "node-fetch";
 import { prisma } from "../../../db";
 
 export default function handler(req, res) {
+  const header = req.header;
+  console.log(header);
   //Get data from Coclima about this store access token
   const company = /* await */ prisma.companies.findFirst({
     where: {

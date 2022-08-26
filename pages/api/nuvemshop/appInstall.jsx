@@ -161,7 +161,7 @@ export default async function handler(req, res) {
       Authentication: "bearer " + access_token,
     },
     body: JSON.stringify({
-      url: "https://parceiros.coclima.com/api/nuvemshop/orderUpdate",
+      url: "https://co-clima-dashboard-v2.vercel.app/api/nuvemshop/orderUpdate",
       event: "order/paid",
     }),
   };
@@ -183,7 +183,7 @@ export default async function handler(req, res) {
       Authentication: "bearer " + access_token,
     },
     body: JSON.stringify({
-      url: "https://parceiros.coclima.com/api/nuvemshop/orderUpdate",
+      url: "https://co-clima-dashboard-v2.vercel.app/api/nuvemshop/orderUpdate",
       event: "order/cancelled",
     }),
   };
