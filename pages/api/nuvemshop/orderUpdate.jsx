@@ -1,29 +1,14 @@
 import fetch from "node-fetch";
 
 export default function handler(req, res) {
-  /* 
-//Login to get an Admin bearer Token
-  const optionsLogin = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: process.env.COCLIMA_ADMIN_LOGIN, password: process.env.COCLIMA_ADMIN_PASSWORD })
-  };
-  const token = await fetch('https://api.coclima.com/login', optionsLogin)
-  const bearer = await token.json()
-  const access_token_coclima = 'Bearer ' + bearer.token
-  console.log(bearer)
-
-  //Get data from Coclima about this store access token
-  const optionsGetCompany = {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Authorization': access_token_coclima }
-  };
-
-  const getExistingCompany = await fetch('https://api.coclima.com/webhookCompanyNS/' + req.body.store_id, optionsGetCompany)
-  const responsegetExistingCompany = await getExistingCompany.json()
-  const access_token = responsegetExistingCompany.access_token
-  const client_id = responsegetExistingCompany.id
-  console.log(responsegetExistingCompany)
+//Get data from Coclima about this store access token
+const company = await prisma.companies.findFirst({
+    where: {
+      nsid: '"' + req.body.store_id + '"',
+    },
+  });  
+  const access_token = company.access_token
+  console.log(company)
 
   //Get data from Order
   const optionsStore = {
@@ -39,14 +24,21 @@ export default function handler(req, res) {
 
 
   //Post Receipt with order information
-  const optionsReceipt = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': access_token_coclima },
-    body: JSON.stringify({ date: date, value: subtotal, client_id: client_id })
-  };
-  const requestReceipt = await fetch('https://api.coclima.com/receipts', optionsReceipt)
-  const responseReceipt = await requestReceipt.json()
-  console.log(responseReceipt) */
+  const receipt = await prisma.receipts.create({
+        data: {
+          date: date,
+          vendor: "nuvemshop",
+          value: subtotal,
+          order_id: req.body.id,
+          company: {
+            connect: {
+              id: company.id,
+            },
+          },
+        },
+      });
+  
+  console.log(receipt) 
 
   return res.status(200).json({});
 }

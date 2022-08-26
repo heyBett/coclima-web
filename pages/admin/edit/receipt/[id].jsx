@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { useRef } from "react";
 import { IMaskInput } from "react-imask";
 import { parse } from "date-fns";
-import Notification from "../../../components/notifications";
+import Notification from "../../../../components/notifications";
 
 export default function Example() {
   const { register, handleSubmit, reset, setValue } = useForm();

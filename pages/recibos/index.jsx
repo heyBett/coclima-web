@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">

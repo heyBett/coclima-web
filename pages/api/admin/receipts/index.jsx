@@ -39,6 +39,7 @@ export default async function handle(req, res) {
           vendor: req.body.vendor,
           value: req.body.value,
           order_id: req.body.order,
+          observations: req.body.observations,
           company: {
             connect: {
               id: req.body.company,

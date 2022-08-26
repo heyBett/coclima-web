@@ -22,6 +22,7 @@ export default async function handle(req, res) {
           vendor: true,
           company: {
             select: {
+              name: true,
               percentage: true,
             },
           },
@@ -60,7 +61,10 @@ export default async function handle(req, res) {
 
       const groupedByMonth = _.groupBy(orderedByMonth, "dateStr");
 
-      res.json(orderedByMonth);
+      res.json({
+        receipts: orderedByMonth,
+        client: receipts[0].company.name,
+      });
     } else {
       res.json("Not authorized");
       res.status(401);

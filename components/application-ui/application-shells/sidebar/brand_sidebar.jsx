@@ -40,13 +40,13 @@ export default function Sidebar(props) {
     },
     { name: "Plantio", href: "/plantios", icon: TreeIcon },
     {
-      name: "Marketing",
-      href: "/marketing",
+      name: "Galeria",
+      href: "/galeria",
       icon: MarketingIcon,
     },
     {
-      name: "Recursos",
-      href: "/recursos",
+      name: "Recibos",
+      href: "/recibos",
       icon: CashIcon,
       admin: true,
     },

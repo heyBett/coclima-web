@@ -1,10 +1,13 @@
 import { prisma } from "../../../db";
 import { authOptions } from "../auth/[...nextauth]";
 import { unstable_getServerSession } from "next-auth/next";
+const axios = require("axios");
 
 export const config = {
   api: {
     responseLimit: false,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
     bodyParser: {
       sizeLimit: "100mb",
     },
@@ -21,6 +24,7 @@ export default async function handle(req, res) {
           planted: req.body.planted,
           tree_value: req.body.tree_cost,
           description: req.body.description,
+          date: req.body.date,
           observations: req.body.observations,
           geolocation: req.body.geolocation,
           external: req.body.external,
@@ -33,10 +37,9 @@ export default async function handle(req, res) {
       });
 
       const archive = req.body.photos.map(async (photo) => {
-        await prisma.archives.create({
+        const files = await prisma.archives.create({
           data: {
             name: photo.filename,
-            data: photo.data,
             type: photo.contentType,
             partner: {
               connect: {
@@ -50,12 +53,22 @@ export default async function handle(req, res) {
             },
           },
         });
+
+        photo.id = files.id;
+        photo.plantation = files.plantation_id;
+        const test = await axios({
+          method: "post",
+          url: "http://localhost:3000/api/fileUpload/upload",
+          data: { photo: photo },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+        });
       });
 
       const handler = req.body.handler.map(async (company) => {
         await prisma.handler.create({
           data: {
-            value: company.value,
+            value: parseInt(company.value, 10),
             company: {
               connect: {
                 id: company.id,
@@ -147,6 +160,7 @@ export default async function handle(req, res) {
         data: {
           planted: req.body.planted,
           tree_value: req.body.tree_cost,
+          date: req.body.date,
           description: req.body.description,
           observations: req.body.observations,
           geolocation: req.body.geolocation,

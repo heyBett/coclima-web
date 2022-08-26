@@ -11,6 +11,7 @@ import {
 } from "../../components/vectors/custom";
 import { useEffect, useState } from "react";
 import GoogleMapReact from "google-map-react";
+import Link from "next/link";
 import useSWR from "swr";
 import Loader from "../../components/loader";
 const defaultProps = {
@@ -68,48 +69,60 @@ export default function Home(props) {
 
   const PlantationOf = (props) => {
     const items = props.items;
-    return (
+    const arvores = (
       items.plantation.handler
         .map((item) => item)
         .map((item) => item.value)
         .reduce((a, b) => a + b, 0) / items.plantation.tree_value
     ).toFixed(0);
+    console.log(arvores);
+    if (arvores > 1) {
+      return arvores + " Árvores";
+    } else return arvores + " Árvore";
   };
 
   const OfYours = (props) => {
     const items = props.items;
-    return (
+    const arvores = (
       items.plantation.handler
         .filter(yourTrees)
         .map((item) => item)
         .map((item) => item.value)
         .reduce((a, b) => a + b, 0) / items.plantation.tree_value
     ).toFixed(0);
+
+    if (arvores > 1) {
+      return arvores + " são suas!";
+    } else return arvores + " é sua!";
   };
 
   const Pin = (items) => (
-    <div
-      className="flex flex-col items-center justify-center w-40 test"
-      style={{ transform: "translate(-50%,-90%)" }}
-    >
-      <div className="px-2 py-1">
-        <p className="px-2 py-1.5 text-center text-white bg-green-600 rounded-t-lg">
-          Plantação de <PlantationOf items={items}></PlantationOf> Árvores
-        </p>
-        <p className="px-3 py-2 text-center text-green-600 bg-white rounded-b-lg">
-          <span className="font-bold">
-            <OfYours items={items}></OfYours> são suas!
-          </span>
-        </p>
-      </div>
-      <Image
-        width={50}
-        height={50}
-        quality={100}
-        className=""
-        src="/images/circledIcon.png"
-      ></Image>
-    </div>
+    <Link href={"/plantios/" + items.plantation.id}>
+      <a>
+        <div
+          className="flex flex-col items-center justify-center w-40 test"
+          style={{ transform: "translate(-50%,-90%)" }}
+        >
+          <div className="px-2 py-1">
+            <p className="px-2 py-1.5 text-center text-white bg-green-600 rounded-t-lg">
+              Plantação de <PlantationOf items={items}></PlantationOf>{" "}
+            </p>
+            <p className="px-3 py-2 text-center text-green-600 bg-white rounded-b-lg">
+              <span className="font-bold">
+                <OfYours items={items}></OfYours>
+              </span>
+            </p>
+          </div>
+          <Image
+            width={50}
+            height={50}
+            quality={100}
+            className=""
+            src="/images/circledIcon.png"
+          ></Image>
+        </div>
+      </a>
+    </Link>
   );
 
   if (!data) {
@@ -119,7 +132,7 @@ export default function Home(props) {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
 
       <div

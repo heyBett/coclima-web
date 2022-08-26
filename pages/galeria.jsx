@@ -8,11 +8,11 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
-        <h1 className="text-4xl font-medium text-green-500">Marketing</h1>
+        <h1 className="text-4xl font-medium text-green-500">Galeria</h1>
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
           Mostre que sua empresa está preocupada em construir um mundo melhor!
         </h2>

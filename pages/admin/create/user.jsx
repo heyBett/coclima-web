@@ -85,7 +85,7 @@ export default function Example() {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
       <Notification
         type={false}

@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../db";
 import EmailProvider from "next-auth/providers/email";
 import type { NextAuthOptions } from "next-auth";
+import { createTransport } from "nodemailer";
 /* import bcrypt from "bcrypt"; */
 
 export const authOptions: NextAuthOptions = {
@@ -31,50 +32,29 @@ export const authOptions: NextAuthOptions = {
       },
       from: process.env.EMAIL_FROM,
       maxAge: 365 * 24 * 60 * 60,
-    }),
-    /*   CredentialsProvider({
-      // The name to display on the sign in form (e.g. 'Sign in with...')
-      name: "Credentials",
-      // The credentials is used to generate a suitable form on the sign in page.
-      // You can specify whatever fields you are expecting to be submitted.
-      // e.g. domain, username, password, 2FA token, etc.
-      // You can pass any HTML attribute to the <input> tag through the object.
-      credentials: {
-        username: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials, req) {
-        const userAuth = await prisma.user.findUnique({
-          where: {
-            email: credentials.username,
-          },
+      async sendVerificationRequest({
+        identifier: email,
+        url,
+        provider: { server, from },
+      }) {
+        const { host } = new URL(url);
+        // NOTE: You are not required to use `nodemailer`, use whatever you want.
+        const transport = createTransport(server);
+        const result = await transport.sendMail({
+          to: email,
+          from: from,
+          subject: `Entre em nossa Dashboard`,
+          text: text({ url, host }),
+          html: html({ url, host }),
         });
-
-        const userPassword = userAuth.password;
-
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          userPassword
-        );
-
-        const userData = {
-          id: userAuth.id,
-          name: userAuth.name,
-          email: userAuth.email,
-          role: userAuth.role,
-          image: userAuth.image,
-          carbonPercentage: userAuth.carbonPercentage,
-          company_id: userAuth.company_id,
-        };
-
-        if (isValid) {
-          return userData;
-        } else {
-          return null;
+        const failed = result.rejected.concat(result.pending).filter(Boolean);
+        if (failed.length) {
+          throw new Error(`Email(s) (${failed.join(", ")}) could not be sent`);
         }
       },
-    }), */
+    }),
   ],
+
   adapter: PrismaAdapter(prisma),
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -101,5 +81,58 @@ export const authOptions: NextAuthOptions = {
     },
   }, */
 };
+
+function html(params: { url: string; host: string }) {
+  const { url, host } = params;
+  console.log(host);
+
+  const escapedHost = host.replace(/\./g, "&#8203;.");
+
+  const brandColor = "#0EC164";
+  const color = {
+    background: "#f9f9f9",
+    text: "#444",
+    mainBackground: "#fff",
+    buttonBackground: brandColor,
+    buttonBorder: brandColor,
+    buttonText: "#fff",
+  };
+
+  return `
+<body style="background: ${color.background};">
+  <table width="100%" border="0" cellspacing="20" cellpadding="0"
+    style="background: ${color.mainBackground}; max-width: 600px; margin: auto; border-radius: 10px;">
+    <tr>
+      <td align="center"
+        style="padding: 10px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
+        Entre em nossa dashboard
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><a href="${url}"
+                target="_blank"
+                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Entrar</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center"
+        style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
+        Se você não pediu por esse email basta ignora-lo
+      </td>
+    </tr>
+  </table>
+</body>
+`;
+}
+
+/** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
+function text({ url, host }: { url: string; host: string }) {
+  return `Entre em nossa dashboard`;
+}
 
 export default NextAuth(authOptions);

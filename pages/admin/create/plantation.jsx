@@ -5,30 +5,77 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import useSWR from "swr";
 import Select from "react-select";
-import Router from "next/router";
 import { useRouter } from "next/router";
+import { parse } from "date-fns";
+import { IMaskInput } from "react-imask";
+import Resizer from "react-image-file-resizer";
 
 export default function Example() {
   const [photos, setPhotos] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [cost, setCost] = useState("25");
+  const { register, handleSubmit, getValues, setValue, unregister, watch } =
+    useForm();
 
-  function handleCompanies(selectedOption) {
-    setSelectedCompanies(selectedOption);
+  function returnIndex(company) {
+    const indexOf = data?.companies.findIndex(findIt);
+    function findIt(item) {
+      return company.id === item.id;
+    }
+    return indexOf;
   }
+
+  useEffect(() => {
+    console.log(selectedCompanies);
+    console.log(getValues("companyData"));
+    setValue(
+      "totalDisponível",
+      getValues("companyData")
+        ?.map((item) => parseFloat(item.avaibleValue))
+        .reduce((a, b) => a + b)
+    );
+    setValue(
+      "totalUtilizado",
+      getValues("companyData")
+        ?.map((item) => parseFloat(item.value))
+        .reduce((a, b) => a + b)
+    );
+    setValue(
+      "totalArvores",
+      getValues("companyData")
+        ?.map((item) => parseFloat(item.treeQuantity))
+        .reduce((a, b) => a + b)
+    );
+  }, [selectedCompanies]);
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin/`, fetcher);
 
   const groupedOptions = [
     {
-      label: "Empresas",
-      options: data?.companies,
+      label: "Empresas com recurso disponível",
+      options: data?.companies.filter(haveValue),
     },
   ];
 
-  const { register, handleSubmit, reset, getValues, setValue } = useForm();
+  function haveValue(company) {
+    const avaibleValue = (
+      (company.receipts
+        .map((item) => item)
+        .map((item) => item.value)
+        .reduce((a, b) => a + b, 0) /
+        10000) *
+        parseInt(company.percentage, 10) -
+      company.handler
+        .map((item) => item)
+        .map((item) => item.value)
+        .reduce((a, b) => a + b, 0)
+    ).toFixed(2);
+    return avaibleValue > 0;
+  }
+
   const router = useRouter();
+
   useEffect(() => {
     if (getValues("partner") === "" || getValues("partner") === undefined) {
       setValue("partner", data?.partners[0].id);
@@ -38,34 +85,13 @@ export default function Example() {
   useEffect(() => {
     selectedCompanies.map((company, index) => {
       setValue(
-        "companyData[" + index + "].treeQuantity",
-        getValues("companyData[" + index + "].treeQuantity")
-      );
-
-      setValue(
-        "companyData[" + index + "].value",
-
-        parseInt(getValues("companyData[" + index + "].treeQuantity"), 10) *
-          parseInt(cost, 10)
-      );
-      setValue(
-        "companyData[" + index + "].avaibleValue",
-
-        "R$ " +
-          (
-            (company.receipts
-              .map((item) => item)
-              .map((item) => item.value)
-              .reduce((a, b) => a + b, 0) /
-              10000) *
-              parseInt(company.percentage, 10) -
-            company.handler
-              .map((item) => item)
-              .map((item) => item.value)
-              .reduce((a, b) => a + b, 0) -
-            parseInt(getValues("companyData[" + index + "].treeQuantity"), 10) *
-              parseInt(cost, 10)
-          ).toFixed(2)
+        "companyData[" + returnIndex(company) + "].treeQuantity",
+        (
+          parseInt(
+            getValues("companyData[" + returnIndex(company) + "].value"),
+            10
+          ) / parseInt(cost, 10)
+        ).toFixed(2)
       );
     });
   }, [cost]);
@@ -105,6 +131,7 @@ export default function Example() {
           handler: data.companyData.filter(isSelected),
           photos: data.photos,
           partner: data.partner,
+          date: parse(data.date, "yyyy-MM-dd", new Date()),
           planted: Boolean(data.planted === "true"),
           tree_cost: parseInt(data.tree_cost, 10),
           description: data.description,
@@ -117,28 +144,93 @@ export default function Example() {
         },
       });
     }
-    /* enabledButton();
-    setPhotos([]);
+    enabledButton();
+    /*  setPhotos([]);
     setSelectedCompanies([]);
     setCost("25");
     reset(); */
-    router.push("/admin?tab=plantations");
+    /*  router.push("/admin?tab=plantations"); */
   };
+
+  useEffect(() => {
+    console.log(photos);
+  }, [photos]);
 
   async function handleFile(event) {
     [...event.target.files].map(async (file) => {
-      const base64 = await convertBase64(file);
-      const photo = {
-        data: base64,
-        filename: file.name,
-        contentType: file.type,
-        size: file.size,
-      };
-      if (photo.size > 2000000) {
-        alert("Tamanho máximo de arquivo: 2MB");
-      } else setPhotos((photos) => [...photos, photo]);
+      if (
+        file.type === "image/png" ||
+        file.type === "image/jpg" ||
+        file.type === "image/gif" ||
+        file.type === "image/webp" ||
+        file.type === "image/jpeg"
+      ) {
+        const base64 = await convertBase64(file);
+        const thumbnail = await makeThumbnail(file);
+        const blur = await makeBlur(file);
+        const social = await makeSocial(file);
+
+        const photo = {
+          data: base64,
+          thumbnail: thumbnail,
+          blur: blur,
+          social: social,
+          filename: file.name,
+          contentType: file.type,
+          size: file.size,
+        };
+        setPhotos((photos) => [...photos, photo]);
+      }
     });
   }
+
+  const makeSocial = (file) =>
+    new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        1000,
+        1000,
+        "WEBP",
+        90,
+        0,
+        (uri) => {
+          resolve(uri);
+        },
+        "base64"
+      );
+    });
+
+  const makeThumbnail = (file) =>
+    new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        200,
+        200,
+        "WEBP",
+        90,
+        0,
+        (uri) => {
+          resolve(uri);
+        },
+        "base64"
+      );
+    });
+
+  const makeBlur = (file) =>
+    new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file,
+        25,
+        25,
+        "WEBP",
+        90,
+        0,
+        (uri) => {
+          resolve(uri);
+        },
+        "base64"
+      );
+    });
 
   async function convertBase64(file) {
     return new Promise((resolve, reject) => {
@@ -156,10 +248,13 @@ export default function Example() {
   function removeAsset(item) {
     setPhotos((photos) => photos.filter((photo) => photo.data !== item.data));
   }
+
+  useEffect(() => {}, []);
+
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
@@ -279,7 +374,7 @@ export default function Example() {
                         ></textarea>
                       </div>
                     </div>
-                    <div className="col-span-12 md:col-span-4">
+                    <div className="col-span-12 md:col-span-3">
                       <label className="block text-sm font-medium text-gray-700">
                         Latitude
                       </label>
@@ -294,7 +389,7 @@ export default function Example() {
                         />
                       </div>
                     </div>
-                    <div className="col-span-12 md:col-span-4">
+                    <div className="col-span-12 md:col-span-3">
                       <label className="block text-sm font-medium text-gray-700">
                         Longitude
                       </label>
@@ -309,7 +404,7 @@ export default function Example() {
                         />
                       </div>
                     </div>
-                    <div className="col-span-12 sm:col-span-4">
+                    <div className="col-span-12 sm:col-span-3">
                       <div className="flex flex-row justify-between">
                         <label
                           htmlFor="company-website"
@@ -324,6 +419,26 @@ export default function Example() {
                           type="text"
                           name="external"
                           id="external"
+                          className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-12 sm:col-span-3">
+                      <div className="flex flex-row justify-between">
+                        <label
+                          htmlFor="company-website"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Data
+                        </label>
+                      </div>
+                      <div className="flex mt-1 rounded-md shadow-sm">
+                        <input
+                          required
+                          {...register("date")}
+                          type="date"
+                          name="date"
+                          id="date"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         />
                       </div>
@@ -398,7 +513,9 @@ export default function Example() {
                       }, */
                       })}
                       value={selectedCompanies}
-                      noOptionsMessage={() => "Nenhuma empresa encontrada"}
+                      noOptionsMessage={() =>
+                        "Nenhuma empresa com recurso disponível encontrada"
+                      }
                       loadingMessage={() => "Carregando..."}
                       placeholder="Selecione empresas participantes"
                       id="selectUser"
@@ -406,7 +523,7 @@ export default function Example() {
                       getOptionValue={(option) => `${option.id}`}
                       getOptionLabel={(option) => `${option.name}`}
                       inputClassName="bg-red-600 "
-                      onChange={handleCompanies}
+                      onChange={setSelectedCompanies}
                       options={groupedOptions}
                       menuPortalTarget={document.body}
                       styles={{
@@ -436,11 +553,21 @@ export default function Example() {
                                 className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                               />
                               <input
-                                {...register("companyData[" + index + "].id", {
-                                  value: company.id,
-                                })}
-                                name={"companyData[" + index + "].id"}
-                                id={"companyData[" + index + "].id"}
+                                {...register(
+                                  "companyData[" +
+                                    returnIndex(company) +
+                                    "].id",
+                                  {
+                                    value: company.id,
+                                    shouldUnregister: true,
+                                  }
+                                )}
+                                name={
+                                  "companyData[" + returnIndex(company) + "].id"
+                                }
+                                id={
+                                  "companyData[" + returnIndex(company) + "].id"
+                                }
                                 disabled
                                 type="text"
                                 className="flex-grow hidden w-full min-w-0 bg-gray-200 border-gray-300 rounded-r-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
@@ -464,16 +591,222 @@ export default function Example() {
                               </span>
                               <input
                                 {...register(
-                                  "companyData[" + index + "].avaibleValue"
+                                  "companyData[" +
+                                    returnIndex(company) +
+                                    "].avaibleValue",
+                                  {
+                                    value: (
+                                      (company.receipts
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0) /
+                                        10000) *
+                                        parseInt(company.percentage, 10) -
+                                      company.handler
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0)
+                                    ).toFixed(2),
+                                    shouldUnregister: true,
+                                  }
                                 )}
-                                id={"companyData[" + index + "].avaibleValue"}
-                                name={"companyData[" + index + "].avaibleValue"}
+                                /* {...register(
+                                  "companyData[" + index + "].avaibleValue",
+                                  {
+                                    value: (
+                                      (company.receipts
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0) /
+                                        10000) *
+                                        parseInt(company.percentage, 10) -
+                                      company.handler
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0)
+                                    ).toFixed(2),
+                                    shouldUnregister: true,
+                                  }
+                                )} */
+
+                                id={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].avaibleValue"
+                                }
+                                name={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].avaibleValue"
+                                }
                                 disabled
-                                type="text"
+                                type="number"
                                 className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-r-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                               />
                             </div>
                           </div>
+                          <div className="col-span-12 md:col-span-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Valor Utilizado
+                            </label>
+                            <div className="flex mt-1 rounded-md shadow-sm">
+                              <span className="w-12">
+                                <input
+                                  type="text"
+                                  id="rs"
+                                  name="rs"
+                                  disabled
+                                  value={" R$ "}
+                                  className="block text-white bg-green-600 min-w-1 rounded-l-md sm:text-sm"
+                                ></input>
+                              </span>
+                              <input
+                                type="number"
+                                step="0.01"
+                                className="hidden"
+                                id={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].value"
+                                }
+                                name={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].value"
+                                }
+                                {...register(
+                                  "companyData[" +
+                                    returnIndex(company) +
+                                    "].value",
+                                  {
+                                    shouldUnregister: true,
+                                    value: (
+                                      (company.receipts
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0) /
+                                        10000) *
+                                        parseInt(company.percentage, 10) -
+                                      company.handler
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0)
+                                    ).toFixed(2),
+                                  }
+                                )}
+                              ></input>
+                              <IMaskInput
+                                mask={Number}
+                                radix="."
+                                scale={2}
+                                signed={false}
+                                key={company.id}
+                                padFractionalZeros={true}
+                                normalizeZeros={false}
+                                step="any"
+                                unmask={false} // true|false|'typed'
+                                defaultValue={(
+                                  (company.receipts
+                                    .map((item) => item)
+                                    .map((item) => item.value)
+                                    .reduce((a, b) => a + b, 0) /
+                                    10000) *
+                                    parseInt(company.percentage, 10) -
+                                  company.handler
+                                    .map((item) => item)
+                                    .map((item) => item.value)
+                                    .reduce((a, b) => a + b, 0)
+                                ).toFixed(2)}
+                                max={parseFloat(
+                                  (company.receipts
+                                    .map((item) => item)
+                                    .map((item) => item.value)
+                                    .reduce((a, b) => a + b, 0) /
+                                    10000) *
+                                    parseInt(company.percentage, 10) -
+                                    company.handler
+                                      .map((item) => item)
+                                      .map((item) => item.value)
+                                      .reduce((a, b) => a + b, 0)
+                                ).toFixed(2)}
+                                // DO NOT USE onChange TO HANDLE CHANGES!
+                                // USE onAccept INSTEAD
+                                onAccept={
+                                  // depending on prop above first argument is
+                                  // `value` if `unmask=false`,
+                                  // `unmaskedValue` if `unmask=true`,
+                                  // `typedValue` if `unmask='typed'`
+
+                                  (value, mask) => {
+                                    setValue(
+                                      "companyData[" +
+                                        returnIndex(company) +
+                                        "].value",
+                                      value
+                                    );
+
+                                    setValue(
+                                      "companyData[" +
+                                        returnIndex(company) +
+                                        "].treeQuantity",
+                                      (
+                                        parseInt(
+                                          getValues(
+                                            "companyData[" +
+                                              returnIndex(company) +
+                                              "].value"
+                                          ),
+                                          10
+                                        ) / parseInt(cost, 10)
+                                      ).toFixed(2)
+                                    );
+                                    setValue(
+                                      "totalDisponível",
+                                      getValues("companyData")
+                                        ?.map((item) =>
+                                          parseFloat(item.avaibleValue)
+                                        )
+                                        .reduce((a, b) => a + b)
+                                        .toFixed(2)
+                                    );
+                                    setValue(
+                                      "totalUtilizado",
+                                      getValues("companyData")
+                                        ?.map((item) => parseFloat(item.value))
+                                        .reduce((a, b) => a + b)
+                                        .toFixed(2)
+                                    );
+                                    setValue(
+                                      "totalArvores",
+                                      getValues("companyData")
+                                        ?.map((item) =>
+                                          parseFloat(item.treeQuantity)
+                                        )
+                                        .reduce((a, b) => a + b)
+                                        .toFixed(2)
+                                    );
+                                  }
+                                }
+                                // ...and more mask props in a guide
+
+                                // input props also available
+
+                                type="number"
+                                name={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].value"
+                                }
+                                id={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].value"
+                                }
+                                className="flex-grow block w-full min-w-0 border-gray-300 rounded-r-md sm:text-sm"
+                              />
+                            </div>
+                          </div>
+
                           <div className="col-span-12 md:col-span-4">
                             <label className="block text-sm font-medium text-gray-700">
                               Número de Árvores
@@ -481,19 +814,37 @@ export default function Example() {
                             <div className="flex mt-1 rounded-md shadow-sm">
                               <input
                                 {...register(
-                                  "companyData[" + index + "].treeQuantity"
+                                  "companyData[" +
+                                    returnIndex(company) +
+                                    "].treeQuantity",
+                                  {
+                                    value: (
+                                      ((company.receipts
+                                        .map((item) => item)
+                                        .map((item) => item.value)
+                                        .reduce((a, b) => a + b, 0) /
+                                        10000) *
+                                        parseInt(company.percentage, 10) -
+                                        company.handler
+                                          .map((item) => item)
+                                          .map((item) => item.value)
+                                          .reduce((a, b) => a + b, 0)) /
+                                      parseInt(cost, 10)
+                                    ).toFixed(2),
+                                    shouldUnregister: true,
+                                  }
                                 )}
-                                defaultValue={0}
+                                disabled
+                                key={company.id}
                                 min={0}
                                 type="number"
-                                onChange={(e) => {
+                                /* onChange={(e) => {
                                   setValue(
                                     "companyData[" + index + "].value",
 
                                     parseInt(e.target.value, 10) *
                                       parseInt(cost, 10)
-                                  );
-                                  setValue(
+                                  );  setValue(
                                     "companyData[" + index + "].avaibleValue",
 
                                     "R$ " +
@@ -515,43 +866,112 @@ export default function Example() {
                                           parseInt(cost, 10)
                                       ).toFixed(2)
                                   );
-                                }}
-                                name={"companyData[" + index + "].treeQuantity"}
-                                id={"companyData[" + index + "].treeQuantity"}
-                                className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-span-12 md:col-span-4">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Custo
-                            </label>
-                            <div className="flex mt-1 rounded-md shadow-sm">
-                              <span className="w-12">
-                                <input
-                                  type="text"
-                                  id="rs"
-                                  name="rs"
-                                  disabled
-                                  value={" R$ "}
-                                  className="block text-white bg-green-600 min-w-1 rounded-l-md sm:text-sm"
-                                ></input>
-                              </span>
-                              <input
-                                /* disabled */
-                                {...register(
-                                  "companyData[" + index + "].value"
-                                )}
-                                disabled
-                                name={"companyData[" + index + "].value"}
-                                id={"companyData[" + index + "].value"}
-                                type="text"
-                                className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-r-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                }} */
+                                name={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].treeQuantity"
+                                }
+                                id={
+                                  "companyData[" +
+                                  returnIndex(company) +
+                                  "].treeQuantity"
+                                }
+                                className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                               />
                             </div>
                           </div>
                         </div>
                       ))}
+                    {selectedCompanies.length > 0 && (
+                      <div className="flex flex-col justify-between px-4 py-6 space-x-0 space-y-4 sm:px-6 even:bg-green-100 md:space-x-4 md:space-y-0 md:flex-row">
+                        <div className="col-span-12 md:col-span-4">
+                          <label className="block text-sm font-medium text-gray-700 opacity-0">
+                            Totais
+                          </label>
+                          <div className="flex mt-1 rounded-md">
+                            <input
+                              disabled
+                              type="text"
+                              value={"Totais:"}
+                              className="flex-grow block w-full min-w-0 font-semibold text-center text-white bg-green-600 border-0 rounded-md sm:text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="col-span-12 md:col-span-4">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Total Disponível
+                          </label>
+                          <div className="flex mt-1 rounded-md shadow-sm">
+                            <span className="w-12">
+                              <input
+                                type="text"
+                                id="rs1"
+                                name="rs1"
+                                disabled
+                                value={" R$ "}
+                                className="block text-white bg-green-600 min-w-1 rounded-l-md sm:text-sm"
+                              ></input>
+                            </span>
+                            <input
+                              {...register("totalDisponível", {
+                                value: getValues("companyData")
+                                  .map((item) => parseFloat(item.avaibleValue))
+                                  .reduce((a, b) => a + b),
+                              })}
+                              disabled
+                              type="text"
+                              className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-r-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="col-span-12 md:col-span-4">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Total Utilizado
+                          </label>
+                          <div className="flex mt-1 rounded-md shadow-sm">
+                            <span className="w-12">
+                              <input
+                                type="text"
+                                id="rs"
+                                name="rs"
+                                disabled
+                                value={" R$ "}
+                                className="block text-white bg-green-600 min-w-1 rounded-l-md sm:text-sm"
+                              ></input>
+                            </span>
+                            <input
+                              {...register("totalUtilizado", {
+                                value: getValues("companyData")
+                                  .map((item) => parseFloat(item.value))
+                                  .reduce((a, b) => a + b),
+                              })}
+                              disabled
+                              type="text"
+                              className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-r-md sm:text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Total de Árvores
+                          </label>
+                          <div className="flex mt-1 rounded-md shadow-sm">
+                            <input
+                              {...register("totalArvores", {
+                                value: getValues("companyData")
+                                  .map((item) => parseFloat(item.treeQuantity))
+                                  .reduce((a, b) => a + b),
+                              })}
+                              disabled
+                              type="text"
+                              className="flex-grow block w-full min-w-0 bg-gray-200 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

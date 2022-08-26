@@ -72,7 +72,7 @@ export function Layout({ children }) {
 
   if (loading) {
     <Head>
-      <title>COCLIMA</title>
+      <title>Dashboard | Coclima</title>
     </Head>;
     return <Loader></Loader>;
   }

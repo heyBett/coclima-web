@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 3001",
     "lint": "next lint"
   },
   "dependencies": {
@@ -17,6 +17,8 @@
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "date-fns": "^2.29.1",
+    "formidable": "^2.0.1",
+    "fs": "^0.0.1-security",
     "google-map-react": "^2.2.0",
     "lodash": "^4.17.21",
     "next": "12.2.0",
@@ -27,6 +29,7 @@
     "react-awesome-reveal": "^3.8.1",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.34.0",
+    "react-image-file-resizer": "^0.4.8",
     "react-imask": "^6.4.2",
     "react-select": "^5.4.0",
     "recharts": "^2.1.12",

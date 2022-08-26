@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { parseISO, format } from "date-fns";
 
 export default function Example(props) {
   const plantations = props.plantations;
@@ -51,7 +52,13 @@ export default function Example(props) {
                       role="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Valor Investido
+                      Carbono Utilizado
+                    </th>
+                    <th
+                      role="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      Data do Plantio
                     </th>
 
                     <th
@@ -105,6 +112,11 @@ export default function Example(props) {
                               .map((item) => item.value)
                               .reduce((a, b) => a + b, 0) /* / 100 */
                               .toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        <div className="text-gray-500">
+                          {format(parseISO(plantation.date), "dd/MM/yyyy")}
                         </div>
                       </td>
 

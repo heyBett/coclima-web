@@ -22,7 +22,8 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.jsx",
-    "pages/index.jsx"
+    "pages/index.jsx",
+    "pages/api/nuvemshop/storeModal.js"
   ],
   "exclude": ["node_modules"]
 }

@@ -23,15 +23,15 @@ export default function Home(props) {
   });
 
   useEffect(() => {
-    if (data !== undefined && !loaded) {
-      const lenght = data?.length;
-      setSelectedMonth(data[lenght - 1].dateStr);
+    if (data?.receipts !== undefined && !loaded) {
+      const lenght = data?.receipts.length;
+      setSelectedMonth(data.receipts[lenght - 1].dateStr);
       setSelectedIndex(lenght - 1);
       setLoaded(true);
     }
   }, [data]);
 
-  const receipts = data;
+  const receipts = data?.receipts;
 
   function uniqBy(a, key) {
     var seen = {};
@@ -46,7 +46,7 @@ export default function Home(props) {
   }
 
   const months = uniqBy(
-    data?.map((item) => item.dateStr),
+    data?.receipts?.map((item) => item.dateStr),
     JSON.stringify
   );
 
@@ -61,7 +61,7 @@ export default function Home(props) {
       </Head>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
-        <h1 className="text-4xl font-medium text-green-500">Recursos</h1>
+        <h1 className="text-4xl font-medium text-green-500">{data?.client}</h1>
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
           Administre recibos e pagamentos
         </h2>
@@ -94,7 +94,7 @@ export default function Home(props) {
             </div>
           </Tab.Group>
         </div>
-        <Table receipts={data?.filter(fromThisMonth)}></Table>
+        <Table receipts={data?.receipts.filter(fromThisMonth)}></Table>
       </main>
     </div>
   );

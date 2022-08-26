@@ -15,7 +15,7 @@ model archives {
   id            String      @id @unique @default(cuid())
   name          String?
   thumbnail     String?
-  data          String
+  data          String?
   partner_id    String
   partner       companies   @relation(fields: [partner_id], references: [id])
   plantation_id String
@@ -57,11 +57,13 @@ model companies {
   nsid                          String?
   nstoken                       String?
   percentage                    Decimal       @default(1)
-  users                         User[]
+  users                         User[]        @relation("id")
   receipts                      receipts[]
   handler                       handler[]
   archives                      archives[]
   plantations                   plantations[]
+
+  @@unique([id, cpfcnpj])
 }
 
 model plantations {
@@ -99,6 +101,7 @@ model receipts {
   value         Int
   company_id    String
   plantation_id String?
+  observations  String?
   company       companies    @relation(fields: [company_id], references: [id])
   plantations   plantations? @relation(fields: [plantation_id], references: [id])
   order_id      String?
@@ -106,6 +109,7 @@ model receipts {
   deleted_at    DateTime?
   created_at    DateTime     @default(now())
   updated_at    DateTime     @default(now())
+  logs          Logs[]
 }
 
 model User {
@@ -119,7 +123,8 @@ model User {
   carbonPercentage Int        @default(2)
   company_id       String?
   sessions         Session[]
-  company          companies? @relation(fields: [company_id], references: [id])
+  company          companies? @relation("id", fields: [company_id, company_cnpj], references: [id, cpfcnpj])
+  company_cnpj     String?
   deleted_at       DateTime?
   created_at       DateTime   @default(now())
   updated_at       DateTime   @default(now())
@@ -141,4 +146,13 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Logs {
+  id          String   @id @unique @default(cuid())
+  receipt     receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  receiptId   String
+  event       String
+  description String?
+  created_at  DateTime @default(now())
 }

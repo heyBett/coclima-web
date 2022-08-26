@@ -11,7 +11,7 @@ export default function Example(props) {
     <div className="">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-medium text-green-500">Recursos</h1>
+          <h1 className="text-4xl font-medium text-green-500">Recibos</h1>
           <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
             Administre recibos e pagamentos
           </h2>
@@ -107,7 +107,7 @@ export default function Example(props) {
                         </div>
                       </td>
                       <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                        <Link href={"/recursos/" + company.id}>
+                        <Link href={"/recibos/" + company.id}>
                           <a className="text-green-600 hover:text-green-900">
                             Detalhes
                             <span className="sr-only">, {company.name}</span>

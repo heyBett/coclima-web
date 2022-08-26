@@ -24,6 +24,7 @@ export default function Home() {
   const [graph, setGraph] = useState([]);
   const [legenda, setLegenda] = useState("Árvores Plantadas:");
   const [style, setStyle] = useState("Linha");
+  const [maximum, setMaximum] = useState(0);
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data, error } = useSWR("/api/views/dashboard", fetcher, {
@@ -32,11 +33,25 @@ export default function Home() {
 
   useEffect(() => {
     if (tab === "Plantio") {
+      const allValues = data?.graph.treeGraph;
+      const arrayOfValues = allValues?.map((item) => parseInt(item.value), 10);
+      if (arrayOfValues?.length > 0) {
+        const maxValue = Math.max(...arrayOfValues);
+        setMaximum(maxValue);
+      }
       setGraph(data?.graph.treeGraph);
+
       setLegenda("Árvores Plantadas:");
     }
     if (tab === "Repasse") {
+      const allValues = data?.graph.valueGraph;
+      const arrayOfValues = allValues?.map((item) => parseInt(item.value), 10);
+      if (arrayOfValues?.length > 0) {
+        const maxValue = Math.max(...arrayOfValues);
+        setMaximum(maxValue);
+      }
       setGraph(data?.graph.valueGraph);
+
       setLegenda("Valor (R$):");
     }
   }, [tab, data]);
@@ -48,7 +63,7 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Dashboard | Coclima</title>
       </Head>
 
       <main className="flex flex-col justify-between m-6 sm:mx-10 sm:mt-10">
@@ -108,20 +123,26 @@ export default function Home() {
             )}
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
             {style === "Linha" ? (
               <AreaChart
                 data={graph}
                 margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
               >
                 <XAxis dataKey="month" />
-                <YAxis dataKey="value" />
+                <YAxis
+                  dataKey="value"
+                  type="number"
+                  domain={[(dataMin) => 0, (dataMax) => maximum + maximum / 10]}
+                  allowDataOverflow={false}
+                  scale="linear"
+                />
                 <CartesianGrid strokeDasharray="3 3" />
                 <Tooltip />
 
                 <Area
                   animationEasing="ease-in-out"
-                  type="natural"
+                  type="linear"
                   dot={true}
                   dataKey="value"
                   stroke="#0A8F4A"
@@ -137,7 +158,10 @@ export default function Home() {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
+
+                <YAxis
+                  domain={[(dataMin) => 0, (dataMax) => maximum + maximum / 10]}
+                />
                 <Tooltip />
                 <Legend />
                 <Bar

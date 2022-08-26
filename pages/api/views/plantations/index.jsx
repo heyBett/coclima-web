@@ -6,81 +6,158 @@ const _ = require("lodash");
 export default async function handle(req, res) {
   const session = await unstable_getServerSession(req, res, authOptions);
   if (session) {
-    const result = await prisma.companies.findUnique({
-      where: {
-        id: session.user.company_id,
-      },
-      select: {
-        handler: {
-          select: {
-            id: true,
-            value: true,
-            plantations: {
-              select: {
-                planted: true,
-                tree_value: true,
-                date: true,
-                geolocation: true,
+    if (session.user.role === "Admin") {
+      const result = await prisma.companies.findMany({
+        select: {
+          handler: {
+            select: {
+              id: true,
+              value: true,
+              plantations: {
+                select: {
+                  planted: true,
+                  tree_value: true,
+                  date: true,
+                  geolocation: true,
 
-                created_at: true,
-                partner: {
-                  select: {
-                    name: true,
-                    id: true,
+                  created_at: true,
+                  partner: {
+                    select: {
+                      name: true,
+                      id: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const handlerMap = result.handler.map((item) => item.id);
+      const allHandlers = result.map((item) => item.handler);
 
-    const photos = await prisma.archives.findMany({
-      take: 9,
-      where: {
-        plantation: {
-          handler: {
-            some: {
-              company_id: session.user.company_id,
+      const wrappedArray = _.flatten(allHandlers);
+
+      const photos = await prisma.archives.findMany({
+        take: 9,
+        where: {
+          plantation: {
+            handler: {
+              some: {
+                company_id: session.user.company_id,
+              },
             },
           },
         },
-      },
-    });
+      });
 
-    const plantations = await prisma.plantations.findMany({
-      where: {
-        handler: {
-          some: {
-            id: { in: result.handler.map((item) => item.id) },
+      const plantations = await prisma.plantations.findMany({
+        where: {
+          handler: {
+            some: {
+              id: { in: wrappedArray.map((item) => item.id) },
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        date: true,
-        geolocation: true,
-        planted: true,
-        external: true,
-        description: true,
-        tree_value: true,
-        handler: {
-          select: {
-            value: true,
-            company_id: true,
+        select: {
+          id: true,
+          date: true,
+          geolocation: true,
+          planted: true,
+          external: true,
+          description: true,
+          tree_value: true,
+          handler: {
+            select: {
+              value: true,
+              company_id: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    res.json({
-      data: result,
-      photos: photos,
-      plantations: plantations,
-    });
+      res.json({
+        data: result,
+        photos: photos,
+        plantations: plantations,
+      });
+    } else {
+      const result = await prisma.companies.findUnique({
+        where: {
+          id: session.user.company_id,
+        },
+        select: {
+          handler: {
+            select: {
+              id: true,
+              value: true,
+              plantations: {
+                select: {
+                  planted: true,
+                  tree_value: true,
+                  date: true,
+                  geolocation: true,
+
+                  created_at: true,
+                  partner: {
+                    select: {
+                      name: true,
+                      id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const handlerMap = result.handler.map((item) => item.id);
+
+      const photos = await prisma.archives.findMany({
+        take: 9,
+        where: {
+          plantation: {
+            handler: {
+              some: {
+                company_id: session.user.company_id,
+              },
+            },
+          },
+        },
+      });
+
+      const plantations = await prisma.plantations.findMany({
+        where: {
+          handler: {
+            some: {
+              id: { in: result.handler.map((item) => item.id) },
+            },
+          },
+        },
+        select: {
+          id: true,
+          date: true,
+          geolocation: true,
+          planted: true,
+          external: true,
+          description: true,
+          tree_value: true,
+          handler: {
+            select: {
+              value: true,
+              company_id: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        data: result,
+        photos: photos,
+        plantations: plantations,
+      });
+    }
   } else {
     res.json("Not authorized");
     res.status(401);

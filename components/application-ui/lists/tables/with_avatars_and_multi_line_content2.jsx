@@ -35,13 +35,13 @@ export default function Example(props) {
                       role="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Capital Utilizado
+                      Carbono Utilizado
                     </th>
                     <th
                       role="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Capital Disponível
+                      Disponível p/ Plantio
                     </th>
 
                     <th

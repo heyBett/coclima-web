@@ -18,7 +18,7 @@ export default function Example(props) {
   const router = useRouter();
   const id = router.query.id;
 
-  const onChange = async (item) => {
+  /* const onChange = async (item) => {
     await axios({
       method: "PATCH",
       url: "/api/admin/receipts/" + item.id,
@@ -28,7 +28,7 @@ export default function Example(props) {
       },
     });
     mutate("/api/admin/receipts/" + id);
-  };
+  }; */
 
   function classSelect(item) {
     if (item) {
@@ -82,10 +82,14 @@ export default function Example(props) {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {ordenedReceipts?.map((receipt) => (
-                    <tr key={receipt.id} className={classSelect(receipt.paid)}>
+                    <tr
+                      key={
+                        receipt.id
+                      } /* className={classSelect(receipt.paid)} */
+                    >
                       <td className="py-4 pl-4 pr-3 text-sm whitespace-nowrap sm:pl-6">
                         <div className="flex items-center">
-                          <div className="font-medium text-white">
+                          <div className="font-medium text-gray-500">
                             {receipt.orderId !== null
                               ? receipt.orderId
                               : receipt.id}
@@ -93,15 +97,15 @@ export default function Example(props) {
                         </div>
                       </td>
                       <td className="px-3 py-4 text-sm whitespace-nowrap">
-                        <div className="text-white">{receipt.vendor}</div>
+                        <div className="text-gray-800">{receipt.vendor}</div>
                       </td>
                       <td className="px-3 py-4 text-sm whitespace-nowrap">
-                        <div className="text-white">
+                        <div className="text-gray-800">
                           R$ {(receipt.value / 100).toFixed(2)}
                         </div>
                       </td>
                       <td className="px-3 py-4 text-sm whitespace-nowrap">
-                        <div className="text-white">
+                        <div className="text-gray-800">
                           R${" "}
                           {(
                             (receipt.value / 10000) *
@@ -110,22 +114,13 @@ export default function Example(props) {
                         </div>
                       </td>
                       <td className="px-3 py-4 text-sm whitespace-nowrap">
-                        <div className="text-center text-white">
-                          {!receipt.paid ? (
-                            <button
-                              onClick={() => onChange(receipt)}
-                              className="w-24 px-3 py-2 text-red-600 bg-red-200 rounded-sm"
-                            >
-                              Pendente
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => onChange(receipt)}
-                              className="w-24 px-3 py-2 text-green-600 bg-green-200 rounded-sm"
-                            >
-                              Pago
-                            </button>
-                          )}
+                        <div className="text-center text-gray-800">
+                          <button
+                            onClick={() => onChange(receipt)}
+                            className="w-24 px-3 py-2 text-gray-600 bg-gray-200 rounded-sm"
+                          >
+                            Editar
+                          </button>
                         </div>
                       </td>
                     </tr>
