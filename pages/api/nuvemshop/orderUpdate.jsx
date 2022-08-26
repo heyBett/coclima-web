@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 
 export default function handler(req, res) {
 //Get data from Coclima about this store access token
-const company = await prisma.companies.findFirst({
+const company = prisma.companies.findFirst({
     where: {
       nsid: '"' + req.body.store_id + '"',
     },
@@ -24,7 +24,7 @@ const company = await prisma.companies.findFirst({
 
 
   //Post Receipt with order information
-  const receipt = await prisma.receipts.create({
+  const receipt =  prisma.receipts.create({
         data: {
           date: date,
           vendor: "nuvemshop",
