@@ -15,9 +15,9 @@ export default async function handle(req, res) {
         },
         select: {
           id: true,
+          logs: true,
           paid: true,
           value: true,
-          date: true,
           order_id: true,
           vendor: true,
           company: {
@@ -50,11 +50,16 @@ export default async function handle(req, res) {
         value: item.value,
         id: item.id,
         paid: item.paid,
+        log: item.logs,
         percentage: item.company.percentage,
         orderId: item.order_id,
         vendor: item.vendor,
-        dateStr: month[item.date.getMonth()] + "/" + item.date.getFullYear(),
-        dateInt: item.date.getMonth() + 1 + "/" + item.date.getFullYear(),
+        dateStr:
+          month[item.created_at.getMonth()] +
+          "/" +
+          item.created_at.getFullYear(),
+        dateInt:
+          item.created_at.getMonth() + 1 + "/" + item.created_at.getFullYear(),
       }));
 
       const orderedByMonth = _.orderBy(dateArray, ["dateInt"], ["asc"]);
@@ -73,12 +78,58 @@ export default async function handle(req, res) {
 
   if (req.method === "PATCH") {
     if (session.user.role === "Admin") {
+      console.log(req.query.id);
+
       const receipt = await prisma.receipts.update({
         where: {
-          id: req.body.id,
+          id: req.query.id,
         },
         data: {
+          created_at: req.body.created_at,
+          due_at: req.body.due_at,
+          paid_at: req.body.paid_at,
+          vendor: req.body.vendor,
+          value: req.body.value,
+          order_id: req.body.order_id,
+          observations: req.body.observations,
+          company: {
+            connect: {
+              id: req.body.company,
+            },
+          },
           paid: req.body.paid,
+        },
+      });
+
+      const log = await prisma.logs.create({
+        data: {
+          receipt: {
+            connect: {
+              id: receipt.id,
+            },
+          },
+          content: receipt,
+          value: String(receipt.value),
+          status: receipt.paid,
+          owner: session.user.name,
+          event: "Recibo Atualizado",
+          description: "Recibo atualizado via Dashboard",
+        },
+      });
+      res.json(receipt);
+    } else {
+      res.json("");
+    }
+  }
+
+  if (req.method === "DELETE") {
+    if (session.user.role === "Admin") {
+      const receipt = await prisma.receipts.update({
+        where: {
+          id: req.query.id,
+        },
+        data: {
+          deleted_at: new Date(),
         },
       });
       res.json(receipt);

@@ -1,7 +1,30 @@
 import Link from "next/link";
+const _ = require("lodash");
 
 export default function Example(props) {
   const partners = props.partners;
+
+  /* const totalSpent = _.sum(
+    companies
+      .filter(handlerLength)
+      .map((item) =>
+        item.handler
+          .map((item) => parseFloat(item.value))
+          .reduce((a, b) => a + b)
+      )
+  ); */
+
+  const totalTrees = _.sum(
+    _.flattenDeep(
+      partners.map((item) =>
+        item.plantations.map(
+          (item) =>
+            item.handler.map((item) => item.value).reduce((a, b) => a + b, 0) /
+            item.tree_value
+        )
+      )
+    )
+  );
 
   return (
     <div className="">
@@ -121,6 +144,25 @@ export default function Example(props) {
                       </td>
                     </tr>
                   ))}
+                  <tr className="bg-green-500">
+                    <td className="py-4 pl-4 pr-3 text-sm whitespace-nowrap sm:pl-6">
+                      <div className="flex items-center">
+                        <div className="font-bold text-white">TOTAL</div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap"></td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap">
+                      <div className="text-white">
+                        {totalTrees} {totalTrees > 1 ? "Árvores" : "Árvore"}{" "}
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap">
+                      <div className="text-white">
+                        {(totalTrees * 130) / 1000} Toneladas{" "}
+                      </div>
+                    </td>
+                    <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"></td>
+                  </tr>
                 </tbody>
               </table>
             </div>

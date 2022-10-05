@@ -71,21 +71,6 @@ export default async function handle(req, res) {
         "Dez",
       ];
 
-      const monthIndex = [
-        "01",
-        "02",
-        "03",
-        "04",
-        "05",
-        "06",
-        "07",
-        "08",
-        "09",
-        "10",
-        "11",
-        "12",
-      ];
-
       const dateArray = toDateArray.map((item) => ({
         value: item.value,
         trees: item.plantations.tree_value,
@@ -95,8 +80,7 @@ export default async function handle(req, res) {
           "/" +
           item.plantations.date.getFullYear(),
         dateInt:
-          monthIndex[item.plantations.date.getMonth()] +
-          1 +
+          parseInt(item.plantations.date.getMonth() + 1) +
           "/" +
           item.plantations.date.getFullYear(),
       }));
@@ -114,9 +98,10 @@ export default async function handle(req, res) {
 
       const treeGraph = Object.keys(groupedByMonth).map((item) => ({
         month: item,
-        value:
+        value: Math.ceil(
           _.sumBy(groupedByMonth[item], "value").toFixed(0) /
-          _.sumBy(groupedByMonth[item], "trees").toFixed(0),
+            _.sumBy(groupedByMonth[item], "trees").toFixed(0)
+        ),
       }));
 
       res.json({
@@ -200,11 +185,12 @@ export default async function handle(req, res) {
           "/" +
           item.plantations.date.getFullYear(),
         dateInt:
-          item.plantations.date.getMonth() +
-          1 +
+          parseInt(item.plantations.date.getMonth() + 1) +
           "/" +
           item.plantations.date.getFullYear(),
       }));
+
+      console.log(dateArray);
 
       const orderedByMonth = _.orderBy(dateArray, ["dateInt"], ["asc"]);
 

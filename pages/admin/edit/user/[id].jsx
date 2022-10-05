@@ -11,9 +11,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import useSWR from "swr";
 import { useRouter } from "next/router";
+import Confirmation from "../../../../components/confirmationModal";
 
 export default function Example() {
   const [profileImage, setProfileImage] = useState("/images/default_user.jpg");
+  const [open, setOpen] = useState(false);
 
   const { register, handleSubmit, reset, getValues, setValue } = useForm();
   const router = useRouter();
@@ -86,12 +88,26 @@ export default function Example() {
     });
   }
 
+  function openModal() {
+    setOpen(true);
+    setTimeout(function () {
+      setOpen(false);
+    }, 100);
+  }
+
   return (
     <div>
       <Head>
         <title>Dashboard | Coclima</title>
       </Head>
-
+      <Confirmation
+        open={open}
+        title={"Apagar Usuário"}
+        description={"Você tem certeza que deseja apagar esse usuário?"}
+        mutate={"/api/admin/user?id=" + id}
+        endpoint={"/api/admin/user?id=" + id}
+        redirect="/admin?tab=users"
+      ></Confirmation>
       <main className="m-6 sm:mx-10 sm:mt-10">
         <h1 className="text-4xl font-medium text-green-500">Editar Usuário</h1>
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
@@ -255,7 +271,13 @@ export default function Example() {
                     </div>
                   </div>
                 </div>
-                <div className="px-4 py-3 text-right bg-gray-50 sm:px-6">
+                <div className="px-4 py-3 space-x-2 text-right bg-gray-50 sm:px-6">
+                  <a
+                    onClick={() => openModal()}
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-red-700 "
+                  >
+                    Apagar
+                  </a>
                   <button
                     id="submitButton"
                     type="submit"

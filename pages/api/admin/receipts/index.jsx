@@ -35,10 +35,12 @@ export default async function handle(req, res) {
     if (req.method === "POST") {
       const receipt = await prisma.receipts.create({
         data: {
-          date: req.body.date,
+          created_at: req.body.created_at,
+          due_at: req.body.due_at,
+          paid_at: req.body.paid_at,
           vendor: req.body.vendor,
           value: req.body.value,
-          order_id: req.body.order,
+          order_id: req.body.order_id,
           observations: req.body.observations,
           company: {
             connect: {
@@ -46,6 +48,22 @@ export default async function handle(req, res) {
             },
           },
           paid: req.body.paid,
+        },
+      });
+
+      const log = await prisma.logs.create({
+        data: {
+          receipt: {
+            connect: {
+              id: receipt.id,
+            },
+          },
+          content: receipt,
+          value: String(receipt.value),
+          status: receipt.paid,
+          owner: session.user.name,
+          event: "Recibo Criado",
+          description: "Recibo criado via Dashboard",
         },
       });
       res.json(receipt);

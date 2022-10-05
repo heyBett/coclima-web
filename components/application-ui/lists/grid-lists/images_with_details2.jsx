@@ -47,7 +47,13 @@ export default function Example() {
                 <div className="block w-full overflow-hidden bg-gray-100 rounded-lg aspect-1 group focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-indigo-500">
                   {plantation.archives.length > 0 ? (
                     <Image
-                      src={plantation.archives[0].data}
+                      src={
+                        "/plantations/" +
+                        plantation.archives[0].plantation_id +
+                        "/" +
+                        plantation.archives[0].id +
+                        "_social.jpg"
+                      }
                       alt="Image of the plantation"
                       className="object-cover pointer-events-none group-hover:opacity-75 "
                       height={500}

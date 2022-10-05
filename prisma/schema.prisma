@@ -57,6 +57,8 @@ model companies {
   nsid                          String?
   nstoken                       String?
   percentage                    Decimal       @default(1)
+  fees                          Decimal       @default(0)
+  penalty                       Decimal       @default(0)
   users                         User[]        @relation("id")
   receipts                      receipts[]
   handler                       handler[]
@@ -96,7 +98,7 @@ model handler {
 
 model receipts {
   id            String       @id @unique @default(cuid())
-  date          DateTime
+  date          DateTime?
   paid          Boolean      @default(false)
   value         Int
   company_id    String
@@ -106,6 +108,8 @@ model receipts {
   plantations   plantations? @relation(fields: [plantation_id], references: [id])
   order_id      String?
   vendor        String?      @default("Interno")
+  paid_at       DateTime?
+  due_at        DateTime?
   deleted_at    DateTime?
   created_at    DateTime     @default(now())
   updated_at    DateTime     @default(now())
@@ -151,10 +155,12 @@ model VerificationToken {
 model Logs {
   id          String   @id @unique @default(cuid())
   receipt     receipts @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  content     Json
   receiptId   String
   value       String
-  status      String
+  status      Boolean
   event       String
+  owner       String?
   description String?
   created_at  DateTime @default(now())
 }

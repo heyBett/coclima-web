@@ -12,9 +12,18 @@ import axios from "axios";
 import useSWR from "swr";
 import { useRouter } from "next/router";
 import Loader from "../../../../components/loader";
+import Confirmation from "../../../../components/confirmationModal";
 
 export default function Example() {
   const { register, handleSubmit, reset } = useForm();
+  const [open, setOpen] = useState(false);
+
+  function openModal() {
+    setOpen(true);
+    setTimeout(function () {
+      setOpen(false);
+    }, 100);
+  }
 
   const router = useRouter();
   const id = router.query.id;
@@ -59,7 +68,14 @@ export default function Example() {
       <Head>
         <title>Dashboard | Coclima</title>
       </Head>
-
+      <Confirmation
+        open={open}
+        title={"Apagar Empresa/Partner"}
+        description={"Você tem certeza que deseja apagar essa Empresa/Partner?"}
+        mutate={"/api/admin/company?id=" + id}
+        endpoint={"/api/admin/company?id=" + id}
+        redirect="/admin?tab=companies"
+      ></Confirmation>
       <main className="m-6 sm:mx-10 sm:mt-10">
         <h1 className="text-4xl font-medium text-green-500">
           Editar Empresa/Partner
@@ -237,6 +253,46 @@ export default function Example() {
                     </div>
                     <div className="col-span-4 sm:col-span-2 lg:col-span-1">
                       <label
+                        htmlFor="fees"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Juros (inadimplência)
+                      </label>
+                      <input
+                        defaultValue={0}
+                        min={0}
+                        required
+                        type="number"
+                        {...register("fees", {
+                          value: company.fees,
+                        })}
+                        name="fees"
+                        id="fees"
+                        className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                      />
+                    </div>
+                    <div className="col-span-4 sm:col-span-2 lg:col-span-1">
+                      <label
+                        htmlFor="postal-code"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Multa (inadimplência)
+                      </label>
+                      <input
+                        defaultValue={0}
+                        min={0}
+                        required
+                        type="number"
+                        {...register("penalty", {
+                          value: company.penalty,
+                        })}
+                        name="penalty"
+                        id="penalty"
+                        className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                      />
+                    </div>
+                    <div className="col-span-4 sm:col-span-2 lg:col-span-1">
+                      <label
                         htmlFor="postal-code"
                         className="block text-sm font-medium text-gray-700"
                       >
@@ -382,7 +438,13 @@ export default function Example() {
                     </div>
                   </div>
                 </div>
-                <div className="px-4 py-3 text-right bg-gray-50 sm:px-6">
+                <div className="px-4 py-3 space-x-2 text-right bg-gray-50 sm:px-6">
+                  <a
+                    onClick={() => openModal()}
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-red-700 "
+                  >
+                    Apagar
+                  </a>
                   <button
                     id="submitButton"
                     type="submit"

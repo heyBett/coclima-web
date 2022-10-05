@@ -3,19 +3,21 @@ import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import Select from "react-select";
 import { useRouter } from "next/router";
 import { IMaskInput } from "react-imask";
 import Resizer from "react-image-file-resizer";
 import Loader from "../../../../components/loader";
 import { addBusinessDays, format, parseISO, parse } from "date-fns";
+import Confirmation from "../../../../components/confirmationModal";
 
 export default function Example() {
   const [photos, setPhotos] = useState([]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [cost, setCost] = useState("25");
   const [applied, setApplied] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
   const id = router.query.id;
@@ -25,6 +27,7 @@ export default function Example() {
   const { data } = useSWR(`/api/admin/`, fetcher);
   const { register, handleSubmit, getValues, setValue, unregister, watch } =
     useForm();
+  const { mutate } = useSWRConfig();
 
   const plantation = request?.plantation;
   const handlers = request?.handler;
@@ -181,52 +184,78 @@ export default function Example() {
     document.getElementById("submitButton").classList.remove("!bg-green-800");
   }
 
-  function isSelected(item) {
-    return (
-      selectedCompanies.some((company) => item.id === company.id) &&
-      parseInt(item.treeQuantity, 10) > 0 &&
-      item.value > 0
-    );
+  useEffect(() => {
+    setPhotos([]);
+
+    const file = plantation?.archives.map(async (item) => {
+      const response = await axios({
+        method: "GET",
+        responseType: "blob",
+        url: "/plantations/" + id + "/" + item.id + "_full.jpg",
+      });
+      const mimeType = response.headers["content-type"];
+      const fileSize = response.headers["content-length"];
+      const image = new File([response.data], item.id + "_full.jpg", {
+        type: mimeType,
+      });
+
+      const base64 = await convertBase64(image);
+      const thumbnail = await makeThumbnail(image);
+      const blur = await makeBlur(image);
+      const social = await makeSocial(image);
+
+      const photo = {
+        data: base64,
+        thumbnail: thumbnail,
+        blur: blur,
+        social: social,
+        filename: item.id + "_full.jpg",
+        contentType: mimeType,
+        size: fileSize,
+      };
+      setPhotos((photos) => [...photos, photo]);
+    });
+  }, [data]);
+
+  function openModal() {
+    setOpen(true);
+    setTimeout(function () {
+      setOpen(false);
+    }, 100);
   }
 
   const onSubmit = async (data) => {
     data.photos = photos;
 
     disabledButton();
-    if (data.companyData === undefined) {
-      alert("Escolha ao menos uma empresa");
-    } else {
-      const response = await axios({
-        method: "POST",
-        url: "/api/admin/plantation",
-        data: {
-          handler: data.companyData.filter(isSelected),
-          photos: data.photos,
-          partner: data.partner,
-          date: parse(data.date, "yyyy-MM-dd", new Date()),
-          planted: Boolean(data.planted === "true"),
-          tree_cost: parseInt(data.tree_cost, 10),
-          description: data.description,
-          observations: data.observations,
-          geolocation: {
-            lat: parseFloat(data.latitude),
-            lng: parseFloat(data.longitude),
-          },
-          external: data.external,
+
+    const response = await axios({
+      method: "PATCH",
+      url: "/api/admin/plantation?id=" + id,
+      data: {
+        photos: data.photos,
+        partner: data.partner,
+        date: parse(data.date, "yyyy-MM-dd", new Date()),
+        planted: Boolean(data.planted === "true"),
+        tree_cost: parseInt(data.tree_cost, 10),
+        description: data.description,
+        observations: data.observations,
+        geolocation: {
+          lat: parseFloat(data.latitude),
+          lng: parseFloat(data.longitude),
         },
-      });
-    }
+        external: data.external,
+      },
+    });
+
     enabledButton();
-    /*  setPhotos([]);
+    /* setPhotos([]);
     setSelectedCompanies([]);
     setCost("25");
     reset(); */
-    /*  router.push("/admin?tab=plantations"); */
+    mutate("/api/admin/plantation?id=" + id);
+    router.push("/admin?tab=plantations");
   };
-
-  useEffect(() => {
-    console.log(photos);
-  }, [photos]);
 
   async function handleFile(event) {
     [...event.target.files].map(async (file) => {
@@ -331,7 +360,14 @@ export default function Example() {
         <Head>
           <title>Dashboard | Coclima</title>
         </Head>
-
+        <Confirmation
+          open={open}
+          title={"Apagar Plantio"}
+          description={"Você tem certeza que deseja apagar esse plantio?"}
+          mutate={"/api/admin/plantation?id=" + id}
+          endpoint={"/api/admin/plantation?id=" + id}
+          redirect="/admin?tab=plantations"
+        ></Confirmation>
         <main className="m-6 sm:mx-10 sm:mt-10">
           <h1 className="text-4xl font-medium text-green-500">
             Criar novo Plantio
@@ -1173,7 +1209,13 @@ export default function Example() {
                     </div> */}
                   </div>
 
-                  <div className="px-4 py-3 text-right bg-gray-50 sm:px-6">
+                  <div className="px-4 py-3 space-x-2 text-right bg-gray-50 sm:px-6">
+                    <a
+                      onClick={() => openModal()}
+                      className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-red-700 "
+                    >
+                      Apagar
+                    </a>
                     <button
                       id="submitButton"
                       type="submit"

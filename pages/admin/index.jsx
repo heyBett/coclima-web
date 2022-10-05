@@ -72,25 +72,9 @@ export default function Home() {
 
         <div className="mt-10"></div>
         <div>
-          <div className="sm:hidden">
-            <label htmlFor="tabs" className="sr-only">
-              Select a tab
-            </label>
-
-            <select
-              id="tabs"
-              name="tabs"
-              className="block w-full border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              defaultValue={tabs.find((tab) => tab.current).name}
-            >
-              {tabs.map((tab) => (
-                <option key={tab.name}>{tab.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="hidden sm:block">
+          <div className="block -mx-6 sm:mx-0">
             <nav
-              className="relative z-0 flex divide-x divide-gray-200 rounded-lg shadow"
+              className="relative z-0 flex divide-x divide-gray-200 shadow sm:rounded-lg"
               aria-label="Tabs"
             >
               {tabs.map((tab, tabIdx) => (
@@ -102,8 +86,8 @@ export default function Home() {
                     tab.current
                       ? "text-gray-900"
                       : "text-gray-500 hover:text-white hover:bg-green-500",
-                    tabIdx === 0 ? "rounded-l-lg" : "",
-                    tabIdx === tabs.length - 1 ? "rounded-r-lg" : "",
+                    tabIdx === 0 ? "sm:rounded-l-lg" : "",
+                    tabIdx === tabs.length - 1 ? "sm:rounded-r-lg" : "",
                     "group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-4 text-sm font-medium text-center focus:z-10 cursor-pointer"
                   )}
                   aria-current={tab.current ? "page" : undefined}

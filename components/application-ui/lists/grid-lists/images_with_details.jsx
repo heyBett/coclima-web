@@ -120,7 +120,13 @@ export default function Example(props) {
             <Image
               width={150}
               height={150}
-              src={file.data}
+              src={
+                "/plantations/" +
+                file.plantation_id +
+                "/" +
+                file.id +
+                "_thumbnail.jpg"
+              }
               alt=""
               className="object-cover pointer-events-none group-hover:opacity-75"
             />

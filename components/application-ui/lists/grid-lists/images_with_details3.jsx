@@ -120,13 +120,31 @@ export default function Example() {
         {data?.archives.map((file) => (
           <li key={file.id} className="relative">
             <div className="block w-full overflow-hidden bg-gray-100 rounded-lg group aspect-1 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 focus-within:ring-green-500">
-              <Image
-                height={500}
-                width={500}
-                src={file.data}
-                alt="Árvore"
-                className="object-cover pointer-events-none group-hover:opacity-75"
-              />
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={
+                  "/plantations/" +
+                  file.plantation_id +
+                  "/" +
+                  file.id +
+                  "_full.jpg"
+                }
+              >
+                <Image
+                  height={500}
+                  width={500}
+                  src={
+                    "/plantations/" +
+                    file.plantation_id +
+                    "/" +
+                    file.id +
+                    "_social.jpg"
+                  }
+                  alt="Árvore"
+                  className="object-cover pointer-events-none group-hover:opacity-75"
+                />
+              </a>
             </div>
           </li>
         ))}

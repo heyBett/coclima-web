@@ -119,14 +119,14 @@ export default async function handle(req, res) {
     }
 
     if (req.method === "PATCH") {
-      const getHandlersToUnset = await prisma.handler.findMany({
+      /*  const getHandlersToUnset = await prisma.handler.findMany({
         where: {
           plantation_id: req.query.id,
         },
         select: {
           id: true,
         },
-      });
+      }); */
 
       const getArchivesToUnset = await prisma.archives.findMany({
         where: {
@@ -144,14 +144,14 @@ export default async function handle(req, res) {
           },
         });
       });
-
+      /* 
       getHandlersToUnset.map(async (handler) => {
         const unsetHandler = await prisma.handler.delete({
           where: {
             id: handler.id,
           },
         });
-      });
+      }); */
 
       const plantation = await prisma.plantations.update({
         where: {
@@ -174,10 +174,9 @@ export default async function handle(req, res) {
       });
 
       const archive = req.body.photos.map(async (photo) => {
-        await prisma.archives.create({
+        const files = await prisma.archives.create({
           data: {
             name: photo.filename,
-            data: photo.data,
             type: photo.contentType,
             partner: {
               connect: {
@@ -191,9 +190,19 @@ export default async function handle(req, res) {
             },
           },
         });
+
+        photo.id = files.id;
+        photo.plantation = files.plantation_id;
+        const test = await axios({
+          method: "post",
+          url: "http://localhost:3000/api/fileUpload/upload",
+          data: { photo: photo },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+        });
       });
 
-      const handler = req.body.handler.map(async (company) => {
+      /* const handler = req.body.handler.map(async (company) => {
         await prisma.handler.create({
           data: {
             value: company.value,
@@ -209,13 +218,31 @@ export default async function handle(req, res) {
             },
           },
         });
-      });
+      }); */
 
-      res.json(await handler);
+      res.json(await archive);
       res.status(201);
     }
 
     if (req.method === "DELETE") {
+      if (session.user.role === "Admin") {
+        const disconnect = await prisma.handler.deleteMany({
+          where: {
+            plantation_id: req.body.id,
+          },
+        });
+
+        const plantation = await prisma.plantations.update({
+          where: {
+            id: req.query.id,
+          },
+          data: {
+            deleted_at: new Date(),
+          },
+        });
+        res.json(plantation);
+        res.status(200);
+      }
     }
   } else {
     res.json("Not authorized");

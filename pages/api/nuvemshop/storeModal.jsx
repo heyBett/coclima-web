@@ -16,7 +16,7 @@ export default async function Modal(req, res) {
 
   let totalValue = 1;
 
-  if (plantedTrees.receipts.length > 0) {
+  if (plantedTrees?.receipts?.length > 0) {
     totalValue = Math.ceil(
       plantedTrees.receipts
         .map(

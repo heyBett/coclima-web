@@ -112,7 +112,7 @@ export default function Example() {
   function isSelected(item) {
     return (
       selectedCompanies.some((company) => item.id === company.id) &&
-      parseInt(item.treeQuantity, 10) > 0 &&
+      parseFloat(item.treeQuantity, 10) > 0 &&
       item.value > 0
     );
   }
@@ -121,7 +121,10 @@ export default function Example() {
     data.photos = photos;
 
     disabledButton();
-    if (data.companyData === undefined) {
+    if (
+      data.companyData.filter(isSelected).length === 0 ||
+      data.companyData.filter(isSelected) === undefined
+    ) {
       alert("Escolha ao menos uma empresa");
     } else {
       const response = await axios({
@@ -149,7 +152,7 @@ export default function Example() {
     setSelectedCompanies([]);
     setCost("25");
     reset(); */
-    /*  router.push("/admin?tab=plantations"); */
+    router.push("/admin?tab=plantations");
   };
 
   useEffect(() => {

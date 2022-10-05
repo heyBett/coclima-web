@@ -7,22 +7,7 @@ export default async function handle(req, res) {
   if (session.user.role === "Admin") {
     if (req.method === "POST") {
       const company = await prisma.companies.create({
-        data: {
-          name: req.body.name,
-          email: req.body.email,
-          role: req.body.role,
-          cpfcnpj: req.body.cpfcnpj,
-          street: req.body.street,
-          number: req.body.number,
-          complement: req.body.complement,
-          district: req.body.district,
-          city: req.body.city,
-          state: req.body.state,
-          cep: req.body.cep,
-          phone: req.body.phone,
-          site: req.body.site,
-          percentage: req.body.percentage,
-        },
+        data: req.body,
       });
       res.json(company);
       res.status(201);
@@ -50,6 +35,18 @@ export default async function handle(req, res) {
     }
 
     if (req.method === "DELETE") {
+      if (session.user.role === "Admin") {
+        const company = await prisma.companies.update({
+          where: {
+            id: req.query.id,
+          },
+          data: {
+            deleted_at: new Date(),
+          },
+        });
+        res.json(company);
+        res.status(200);
+      }
     }
   } else {
     res.json("Not authorized");

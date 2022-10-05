@@ -34,7 +34,12 @@ export default function Home() {
   useEffect(() => {
     if (tab === "Plantio") {
       const allValues = data?.graph.treeGraph;
-      const arrayOfValues = allValues?.map((item) => parseInt(item.value), 10);
+
+      const arrayOfValues = allValues?.map(
+        (item) => parseInt(Math.ceil(item.value)),
+        10
+      );
+
       if (arrayOfValues?.length > 0) {
         const maxValue = Math.max(...arrayOfValues);
         setMaximum(maxValue);
@@ -69,7 +74,7 @@ export default function Home() {
       <main className="flex flex-col justify-between m-6 sm:mx-10 sm:mt-10">
         <Hello data={data}></Hello>
 
-        <div className="">
+        <div className="my-10">
           <div className="flex flex-row justify-between mb-10">
             {tab === "Plantio" ? (
               <div className="flex flex-col sm:flex-row">

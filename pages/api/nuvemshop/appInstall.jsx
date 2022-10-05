@@ -87,9 +87,12 @@ export default async function handler(req, res) {
 
   const existingCompany = await prisma.companies.findFirst({
     where: {
-      nsid: '"' + store_id + '"',
+      nsid: String(store_id),
     },
   });
+
+  console.log(String(store_id));
+  console.log(existingCompany);
 
   let company = existingCompany;
 
@@ -100,7 +103,7 @@ export default async function handler(req, res) {
         street: street,
         phone: phone,
         role: "company",
-        nsid: '"' + store_id + '"',
+        nsid: String(store_id),
         nstoken: access_token,
         cpfcnpj: cpfcnpj,
         email: email,
@@ -113,9 +116,10 @@ export default async function handler(req, res) {
         id: existingCompany.id,
       },
       data: {
-        nsid: '"' + store_id + '"',
+        nsid: String(store_id),
         nstoken: access_token,
         email: email,
+        deleted_at: null,
       },
     });
   }
@@ -135,7 +139,7 @@ export default async function handler(req, res) {
     user = await prisma.user.create({
       data: {
         name: name,
-        role: "user",
+        role: "User",
         email: email,
         company: {
           connect: {
@@ -215,6 +219,29 @@ export default async function handler(req, res) {
   const requestModal = await fetch(urlModal, optionsModal);
   const responseModal = await requestModal.json();
   console.log(responseModal);
+
+  //Create Store's Footer
+
+  const optionsFooter = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "CoClima(https://coclima.com)",
+      Agent: "Luiz Bett(luiz@codx.dev",
+      Authentication: "bearer " + access_token,
+    },
+    body: JSON.stringify({
+      src: "https://parceiros.coclima.com/api/nuvemshop/footerScript",
+      event: "onload",
+      where: "store",
+    }),
+  };
+
+  const urlFooter = "https://api.tiendanube.com/v1/" + store_id + "/scripts";
+  const requestFooter = await fetch(urlFooter, optionsFooter);
+  const responseFooter = await requestFooter.json();
+  console.log(responseFooter);
+
   res
     .status(200)
     .redirect(307, "https://www.coclima.com/obrigado?email=" + email);

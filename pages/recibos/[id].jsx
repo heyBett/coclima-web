@@ -89,7 +89,6 @@ export default function Home(props) {
                     )}
                   </Tab>
                 ))}
-                {/* ...  */}
               </Tab.List>
             </div>
           </Tab.Group>

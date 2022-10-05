@@ -18,7 +18,7 @@ export default function Example(props) {
         </div>
         <div className="">
           <Link href="/admin/create/receipt">
-            <a className="px-4 py-3 my-6 text-white bg-green-500 rounded-md hover:bg-green-700">
+            <a className="block px-4 py-3 my-6 text-center text-white bg-green-500 rounded-md hover:bg-green-700">
               Criar Recibo
             </a>
           </Link>
@@ -107,12 +107,14 @@ export default function Example(props) {
                         </div>
                       </td>
                       <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                        <Link href={"/recibos/" + company.id}>
-                          <a className="text-green-600 hover:text-green-900">
-                            Detalhes
-                            <span className="sr-only">, {company.name}</span>
-                          </a>
-                        </Link>
+                        {company?.receipts.length > 0 && (
+                          <Link href={"/recibos/" + company.id}>
+                            <a className="text-green-600 hover:text-green-900">
+                              Detalhes
+                              <span className="sr-only">, {company.name}</span>
+                            </a>
+                          </Link>
+                        )}
                       </td>
                     </tr>
                   ))}

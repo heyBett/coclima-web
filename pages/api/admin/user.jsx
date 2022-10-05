@@ -93,6 +93,18 @@ export default async function handle(req, res) {
     }
 
     if (req.method === "DELETE") {
+      if (session.user.role === "Admin") {
+        const user = await prisma.user.update({
+          where: {
+            id: req.query.id,
+          },
+          data: {
+            deleted_at: new Date(),
+          },
+        });
+        res.json(user);
+        res.status(200);
+      }
     }
   } else {
     res.json("Not authorized");

@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { prisma } from "../../../db";
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   const crypto = require("crypto");
   const header = req.headers["x-linkedstore-hmac-sha256"];
   const secret = "Bh6XbGgPd1GoW18rCj95m3ePSErdrAB8zv5OuFeVJEI6gt6R";
@@ -17,12 +17,14 @@ export default function handler(req, res) {
 
   if (authenticatedWebhook) {
     //Get data from Coclima about this store access token
-    const company = /* await */ prisma.companies.findFirst({
+    const company = await prisma.companies.findFirst({
       where: {
-        nsid: '"' + req.body.store_id + '"',
+        nsid: String(req.body.store_id),
       },
     });
-    const access_token = company.access_token;
+    const access_token = company.nstoken;
+
+    console.log(company);
 
     //Get data from Order
     const optionsStore = {
@@ -34,24 +36,25 @@ export default function handler(req, res) {
         Authentication: "bearer " + access_token,
       },
     };
+    console.log(access_token);
     const urlStore =
       "https://api.tiendanube.com/v1/" +
       req.body.store_id +
       "/orders/" +
       req.body.id;
-    const requestStore = /*  await */ fetch(urlStore, optionsStore);
-    const responseStore = /* await */ requestStore.json();
+    const requestStore = await fetch(urlStore, optionsStore);
+    const responseStore = await requestStore.json();
     const date = responseStore.created_at;
     const subtotal = responseStore.subtotal;
     console.log(responseStore);
 
     //Post Receipt with order information
-    const receipt = /* await  */ prisma.receipts.create({
+    const receipt = await prisma.receipts.create({
       data: {
-        date: date,
+        date: new Date(),
         vendor: "nuvemshop",
-        value: subtotal,
-        order_id: req.body.id,
+        value: parseInt(subtotal.replace(".", ""), 10),
+        order_id: String(req.body.id),
         company: {
           connect: {
             id: company.id,
@@ -62,17 +65,19 @@ export default function handler(req, res) {
 
     console.log(receipt);
 
-    const log = prisma.log.create({
+    const log = await prisma.logs.create({
       data: {
         receipt: {
           connect: {
             id: receipt.id,
           },
         },
-        value: receipt.value,
+        content: receipt,
+        value: String(receipt.value),
+        status: receipt.paid,
+        owner: session.user.name,
+        event: "Recibo Criado",
         description: "Criado pela API da Nuvemshop",
-        event: "Criado",
-        status: false,
       },
     });
 

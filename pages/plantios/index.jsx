@@ -93,7 +93,9 @@ export default function Home(props) {
 
     if (arvores > 1) {
       return arvores + " são suas!";
-    } else return arvores + " é sua!";
+    } else if ((arvores = 1)) {
+      return arvores + " é sua!";
+    } else return "clique para saber mais";
   };
 
   const Pin = (items) => (

@@ -1,22 +1,60 @@
 import Head from "next/head";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import useSWR from "swr";
-import { useRef } from "react";
+import useSWR, { useSWRConfig } from "swr";
+import { useRouter } from "next/router";
 import { IMaskInput } from "react-imask";
-import { parse } from "date-fns";
+import { parse, parseISO, format } from "date-fns";
 import Notification from "../../../../components/notifications";
+import Confirmation from "../../../../components/confirmationModal";
+import Loader from "../../../../components/loader";
 
 export default function Example() {
-  const { register, handleSubmit, reset, setValue } = useForm();
+  const {
+    register,
+    unregister,
+    handleSubmit,
+    reset,
+    setValue,
+    getValues,
+    watch,
+  } = useForm();
   const [notification, setNotification] = useState(false);
-  const ref = useRef(null);
+  const [status, setStatus] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+
+  const id = router.query.id;
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin/`, fetcher);
+  const url = "/api/admin/receipts/details?id=" + id;
+  const { data: request } = useSWR(url, fetcher);
+  const { mutate } = useSWRConfig();
 
   const companies = data?.companies;
+  const receipt = request;
+
+  function openModal() {
+    setOpen(true);
+    setTimeout(function () {
+      setOpen(false);
+    }, 100);
+  }
+
+  useEffect(() => {
+    setTimeout(function () {
+      if (getValues("status") === "paid") {
+        setStatus(true);
+        register("paid_at", { value: paidAt() });
+      } else {
+        setStatus(false);
+        unregister("paid_at");
+      }
+    }, 500);
+  }, [watch("status"), receipt]);
 
   //New Comment
   function disabledButton() {
@@ -33,14 +71,21 @@ export default function Example() {
 
   const onSubmit = async (data) => {
     disabledButton();
+    let paid_at = null;
+    if (data.paid_at !== undefined) {
+      paid_at = parse(data.paid_at, "yyyy-MM-dd", new Date());
+    }
+
     const response = await axios({
-      method: "POST",
-      url: "/api/admin/receipts",
+      method: "PATCH",
+      url: "/api/admin/receipts/" + id,
       data: {
-        date: parse(data.date, "yyyy-MM-dd", new Date()),
+        created_at: parse(data.created_at, "yyyy-MM-dd", new Date()),
+        paid_at: paid_at,
+        due_at: parse(data.due_at, "yyyy-MM-dd", new Date()),
         vendor: data.vendor,
         value: parseInt(data.value),
-        order: data.order,
+        order_id: data.order,
         company: data.company,
         observations: data.observations,
         paid: data.status === "paid",
@@ -48,27 +93,56 @@ export default function Example() {
     });
     enabledButton();
     reset();
+    mutate("/api/admin/receipts");
+    mutate("/api/admin/receipts/details?id=" + id);
     setNotification(true);
+    router.push("/recibos/" + data.company);
     setTimeout(function () {
       setNotification(false);
     }, 3000);
   };
 
+  function Pago(status) {
+    if (status) {
+      return "paid";
+    } else {
+      return "pendent";
+    }
+  }
+
+  function paidAt() {
+    if (receipt?.paid_at !== null && receipt?.paid_at !== undefined) {
+      return format(parseISO(receipt.paid_at), "yyyy-MM-dd");
+    } else {
+      return format(new Date(), "yyyy-MM-dd");
+    }
+  }
+
+  if (!request) {
+    return <Loader></Loader>;
+  }
+
   return (
     <div>
       <Head>
-        <title>Dashboard | Coclima</title>
+        <title>Novo recibo</title>
       </Head>
       <Notification
         type={true}
-        title={"Recibo criado com sucesso!"}
+        title={"Recibo editado com sucesso!"}
         notification={notification}
       ></Notification>
+      <Confirmation
+        open={open}
+        title={"Apagar Recibo"}
+        description={"Você tem certeza que deseja apagar esse recibo?"}
+        mutate={"/api/admin/receipts?id=" + id}
+        endpoint={"/api/admin/receipts/" + id}
+        redirect={"/recibos/" + receipt.company_id}
+      ></Confirmation>
 
       <main className="m-6 sm:mx-10 sm:mt-10">
-        <h1 className="text-4xl font-medium text-green-500">
-          Criar novo recibo
-        </h1>
+        <h1 className="text-4xl font-medium text-green-500">Editar recibo</h1>
         <h2 className="mt-2 text-lg leading-6 text-gray-700 font-regular">
           {/* Mostre que sua empresa está preocupada em construir um mundo melhor! */}
         </h2>
@@ -102,7 +176,7 @@ export default function Example() {
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <input
                           required
-                          {...register("order")}
+                          {...register("order", { value: request.order_id })}
                           type="text"
                           name="order"
                           id="order"
@@ -117,7 +191,9 @@ export default function Example() {
                       <div className="flex mt-1 rounded-md shadow-sm">
                         {companies?.length > 0 && (
                           <select
-                            {...register("company", { value: companies[0].id })}
+                            {...register("company", {
+                              value: receipt.company_id,
+                            })}
                             name="company"
                             id="company"
                             className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
@@ -137,7 +213,7 @@ export default function Example() {
                       </label>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <select
-                          {...register("vendor")}
+                          {...register("vendor", { value: receipt.vendor })}
                           name="vendor"
                           id="vendor"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
@@ -148,13 +224,15 @@ export default function Example() {
                         </select>
                       </div>
                     </div>
-                    <div className="col-span-3 sm:col-span-2">
+                    <div className="col-span-3 sm:col-span-3">
                       <label className="block text-sm font-medium text-gray-700">
                         Status
                       </label>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <select
-                          {...register("status")}
+                          {...register("status", {
+                            value: Pago(receipt.paid),
+                          })}
                           name="status"
                           id="status"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
@@ -164,7 +242,7 @@ export default function Example() {
                         </select>
                       </div>
                     </div>
-                    <div className="col-span-6 sm:col-span-2">
+                    <div className="col-span-6 sm:col-span-3">
                       <div className="flex flex-row justify-between">
                         <label
                           htmlFor="company-website"
@@ -179,6 +257,7 @@ export default function Example() {
                           radix="."
                           scale={2}
                           signed={false}
+                          value={String(receipt.value / 100)}
                           padFractionalZeros={true}
                           normalizeZeros={false}
                           step="any"
@@ -212,20 +291,74 @@ export default function Example() {
                           htmlFor="company-website"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Data
+                          Data de Criação
                         </label>
                       </div>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <input
                           required
-                          {...register("date")}
+                          {...register("created_at", {
+                            value: format(
+                              parseISO(receipt.created_at),
+                              "yyyy-MM-dd"
+                            ),
+                          })}
                           type="date"
-                          name="date"
-                          id="date"
+                          name="created_at"
+                          id="created_at"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         />
                       </div>
                     </div>
+                    <div className="col-span-6 sm:col-span-2">
+                      <div className="flex flex-row justify-between">
+                        <label
+                          htmlFor="company-website"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Data de Vencimento
+                        </label>
+                      </div>
+                      <div className="flex mt-1 rounded-md shadow-sm">
+                        <input
+                          required
+                          {...register("due_at", {
+                            value: format(
+                              parseISO(receipt.due_at),
+                              "yyyy-MM-dd"
+                            ),
+                          })}
+                          type="date"
+                          name="due_at"
+                          id="due_at"
+                          className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                    {status && (
+                      <div className="col-span-6 sm:col-span-2">
+                        <div className="flex flex-row justify-between">
+                          <label
+                            htmlFor="company-website"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Data de Pagamento
+                          </label>
+                        </div>
+                        <div className="flex mt-1 rounded-md shadow-sm">
+                          <input
+                            required
+                            {...register("paid_at", {
+                              value: paidAt(),
+                            })}
+                            type="date"
+                            name="paid_at"
+                            id="paid_at"
+                            className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="col-span-6">
                     <label
@@ -236,7 +369,9 @@ export default function Example() {
                     </label>
                     <div className="flex mt-1 rounded-md shadow-sm">
                       <textarea
-                        {...register("observations")}
+                        {...register("observations", {
+                          value: receipt.observations,
+                        })}
                         rows={5}
                         placeholder="Observações internas"
                         name="observations"
@@ -246,7 +381,13 @@ export default function Example() {
                     </div>
                   </div>
                 </div>
-                <div className="px-4 py-3 text-right bg-gray-50 sm:px-6">
+                <div className="px-4 py-3 space-x-2 text-right bg-gray-50 sm:px-6">
+                  <a
+                    onClick={() => openModal()}
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-red-700 "
+                  >
+                    Apagar
+                  </a>
                   <button
                     id="submitButton"
                     type="submit"

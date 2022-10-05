@@ -2,3 +2,5 @@ node_modules
 .next
 .envprod.env
 .env
+.idea
+public/plantations

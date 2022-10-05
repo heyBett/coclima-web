@@ -1,22 +1,45 @@
 import Head from "next/head";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import useSWR from "swr";
-import { useRef } from "react";
+import useSWR, { useSWRConfig } from "swr";
 import { IMaskInput } from "react-imask";
 import { parse } from "date-fns";
 import Notification from "../../../components/notifications";
 
 export default function Example() {
-  const { register, handleSubmit, reset, setValue } = useForm();
+  const {
+    register,
+    unregister,
+    handleSubmit,
+    reset,
+    setValue,
+    getValues,
+    watch,
+  } = useForm();
   const [notification, setNotification] = useState(false);
-  const ref = useRef(null);
+  const [status, setStatus] = useState(false);
 
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data } = useSWR(`/api/admin/`, fetcher);
+  const { mutate } = useSWRConfig();
 
   const companies = data?.companies;
+
+  useEffect(() => {
+    if (getValues("status") === "paid") {
+      setStatus(true);
+      register("paid_at");
+    } else {
+      setStatus(false);
+      unregister("paid_at");
+    }
+    console.log(getValues());
+  }, [watch("status")]);
+
+  useEffect(() => {
+    console.log(getValues());
+  }, [watch("order")]);
 
   //New Comment
   function disabledButton() {
@@ -33,14 +56,21 @@ export default function Example() {
 
   const onSubmit = async (data) => {
     disabledButton();
+    let paid_at = null;
+    if (data.paid_at !== undefined) {
+      paid_at = parse(data.paid_at, "yyyy-MM-dd", new Date());
+    }
+
     const response = await axios({
       method: "POST",
       url: "/api/admin/receipts",
       data: {
-        date: parse(data.date, "yyyy-MM-dd", new Date()),
+        created_at: parse(data.created_at, "yyyy-MM-dd", new Date()),
+        paid_at: paid_at,
+        due_at: parse(data.due_at, "yyyy-MM-dd", new Date()),
         vendor: data.vendor,
         value: parseInt(data.value),
-        order: data.order,
+        order_id: data.order,
         company: data.company,
         observations: data.observations,
         paid: data.status === "paid",
@@ -48,6 +78,7 @@ export default function Example() {
     });
     enabledButton();
     reset();
+    mutate("/api/admin/receipts");
     setNotification(true);
     setTimeout(function () {
       setNotification(false);
@@ -57,7 +88,7 @@ export default function Example() {
   return (
     <div>
       <Head>
-        <title>Dashboard | Coclima</title>
+        <title>Novo recibo</title>
       </Head>
       <Notification
         type={true}
@@ -218,10 +249,10 @@ export default function Example() {
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <input
                           required
-                          {...register("creation")}
+                          {...register("created_at")}
                           type="date"
-                          name="creation"
-                          id="creation"
+                          name="created_at"
+                          id="created_at"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         />
                       </div>
@@ -238,34 +269,36 @@ export default function Example() {
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <input
                           required
-                          {...register("due")}
+                          {...register("due_at")}
                           type="date"
-                          name="due"
-                          id="due"
+                          name="due_at"
+                          id="due_at"
                           className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
                         />
                       </div>
                     </div>
-                    <div className="col-span-6 sm:col-span-2">
-                      <div className="flex flex-row justify-between">
-                        <label
-                          htmlFor="company-website"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Data de Pagamento
-                        </label>
+                    {status && (
+                      <div className="col-span-6 sm:col-span-2">
+                        <div className="flex flex-row justify-between">
+                          <label
+                            htmlFor="company-website"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Data de Pagamento
+                          </label>
+                        </div>
+                        <div className="flex mt-1 rounded-md shadow-sm">
+                          <input
+                            required
+                            {...register("paid_at")}
+                            type="date"
+                            name="paid_at"
+                            id="paid_at"
+                            className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                          />
+                        </div>
                       </div>
-                      <div className="flex mt-1 rounded-md shadow-sm">
-                        <input
-                          required
-                          {...register("payment")}
-                          type="date"
-                          name="payment"
-                          id="payment"
-                          className="flex-grow block w-full min-w-0 border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                   <div className="col-span-6">
                     <label

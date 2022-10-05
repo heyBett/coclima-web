@@ -1,19 +1,29 @@
 import Link from "next/link";
 import { parseISO, format } from "date-fns";
+const _ = require("lodash");
 
 export default function Example(props) {
   const plantations = props.plantations;
 
-  const total =
-    plantations[0]?.handler
-      .map((item) => item.value)
-      .reduce((a, b) => a + b, 0) / plantations[0]?.tree_value;
+  function isPlanted(item) {
+    return item.planted;
+  }
 
-  const investido =
-    plantations[0]?.handler
-      .map((item) => item.value)
-      .reduce((a, b) => a + b, 0)
-      .toFixed(2) / 100;
+  const total = _.sum(
+    plantations
+      .filter(isPlanted)
+      .map(
+        (item) =>
+          item.handler.map((item) => item.value).reduce((a, b) => a + b, 0) /
+          item.tree_value
+      )
+  );
+
+  const investido = _.sum(
+    plantations.map((item) =>
+      item.handler.map((item) => item.value).reduce((a, b) => a + b, 0)
+    )
+  );
 
   return (
     <div className="">
@@ -130,6 +140,26 @@ export default function Example(props) {
                       </td>
                     </tr>
                   ))}
+                  <tr className="bg-green-500">
+                    <td className="py-4 pl-4 pr-3 text-sm whitespace-nowrap sm:pl-6">
+                      <div className="flex items-center">
+                        <div className="font-bold text-white">TOTAL</div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap"></td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap">
+                      <div className="text-white">
+                        {total} {total > 1 ? "Árvores" : "Árvore"}{" "}
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-sm text-white whitespace-nowrap">
+                      <div className="text-white">
+                        R$ {investido.toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"></td>
+                    <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6"></td>
+                  </tr>
                 </tbody>
               </table>
             </div>
