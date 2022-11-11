@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   theme: {
     colorScheme: "light",
     brandColor: "#0EC164",
-    /* logo: "https://" + process.env.NEXT_PUBLIC_VERCEL_URL + "/images/logo.svg", */
+    logo: "https://" + process.env.NEXT_PUBLIC_VERCEL_URL + "/images/logo.png",
   },
 
   session: {

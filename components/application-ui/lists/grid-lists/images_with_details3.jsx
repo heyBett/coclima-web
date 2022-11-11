@@ -124,6 +124,7 @@ export default function Example() {
                 target="_blank"
                 rel="noopener noreferrer"
                 href={
+                  "https://assets.coclima.com" +
                   "/plantations/" +
                   file.plantation_id +
                   "/" +
@@ -135,6 +136,7 @@ export default function Example() {
                   height={500}
                   width={500}
                   src={
+                    "https://assets.coclima.com" +
                     "/plantations/" +
                     file.plantation_id +
                     "/" +

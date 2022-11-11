@@ -182,7 +182,7 @@ export default function Example() {
                         htmlFor="company-website"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Carbono (%)
+                        Repasse (%)
                       </label>
                       <div className="flex mt-1 rounded-md shadow-sm">
                         <input

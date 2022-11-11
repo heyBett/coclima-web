@@ -58,7 +58,7 @@ export default async function handle(req, res) {
         photo.plantation = files.plantation_id;
         const test = await axios({
           method: "post",
-          url: "http://localhost:3000/api/fileUpload/upload",
+          url: process.env.UPLOAD_URL + "/api/fileUpload/upload",
           data: { photo: photo },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
@@ -195,7 +195,7 @@ export default async function handle(req, res) {
         photo.plantation = files.plantation_id;
         const test = await axios({
           method: "post",
-          url: "http://localhost:3000/api/fileUpload/upload",
+          url: process.env.UPLOAD_URL + "/api/fileUpload/upload",
           data: { photo: photo },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,

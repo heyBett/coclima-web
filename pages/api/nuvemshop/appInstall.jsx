@@ -51,8 +51,11 @@ export default async function handler(req, res) {
 
   const password = "sen" + responseStore.id;
 
-  let name = responseStore.name.pt;
+  let name = responseStore.name?.pt;
   if (name === null) {
+    name = "Sua Conta";
+  }
+  if (name === undefined) {
     name = "Sua Conta";
   }
 
@@ -87,11 +90,10 @@ export default async function handler(req, res) {
 
   const existingCompany = await prisma.companies.findFirst({
     where: {
-      nsid: String(store_id),
+      cpfcnpj: cpfcnpj,
     },
   });
 
-  console.log(String(store_id));
   console.log(existingCompany);
 
   let company = existingCompany;

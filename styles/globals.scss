@@ -10,6 +10,10 @@ html {
   transition: background-color 0.1s ease, color 0.1s ease,
     border-color 0.1s ease;
 }
+
+.recharts-legend-wrapper {
+  display: none;
+}
 .gmnoprint {
   display: none;
 }
